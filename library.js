@@ -144,6 +144,11 @@ export function buildIndex(library) {
     areaStats.set(a.id, { themes: ts.length, ideas: list.length, videos: new Set(list.flatMap((i) => i.videoIds)).size });
   }
   const active = [...idea.values()].filter((i) => i.status === "active");
+  // Quotes by id (with their video), and the ideas each video sits behind, so
+  // a note linked to a video or a quote can open the idea page that shows it.
+  const quote = new Map(), ideasByVideo = new Map();
+  for (const v of library.videos) for (const q of v.quotes) if (q.id && !quote.has(q.id)) quote.set(q.id, { ...q, videoId: v.id });
+  for (const i of idea.values()) for (const v of i.videoIds) push(ideasByVideo, v, i);
 
   return {
     generatedAt: library.generatedAt,
@@ -152,6 +157,10 @@ export function buildIndex(library) {
     theme: (k) => theme.get(k) ?? null,
     idea: (k) => idea.get(k) ?? null,
     video: (k) => video.get(k) ?? null,
+    quote: (k) => quote.get(k) ?? null,
+    ideasOfVideo: (videoId) => ideasByVideo.get(videoId) ?? [],
+    activeIdeas: () => active,
+    themes: () => [...theme.values()],
     themesOf: (areaId) => themesByArea.get(areaId) ?? [],
     ideasOf: (themeId) => ideasByTheme.get(themeId) ?? [],
     videosOf: (ideaId) => (idea.get(ideaId)?.videoIds ?? []).map((v) => video.get(v)),

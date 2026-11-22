@@ -2,10 +2,12 @@
 // Later phases add stores or indexes by bumping DB_VERSION (and SCHEMA in
 // backup.js when an owner store changes) and adding a step to UPGRADES;
 // existing data is never dropped by an upgrade.
-export const DB_NAME = "tane";
-export const DB_VERSION = 1;
+import { TOMBSTONES, tombstoneId, withTombstones } from "./merge.js";
 
-export const KEY_PATHS = { meta: "key", library: "id", notes: "id", myIdeas: "id", days: "id" };
+export const DB_NAME = "tane";
+export const DB_VERSION = 2;
+
+export const KEY_PATHS = { meta: "key", library: "id", notes: "id", myIdeas: "id", days: "id", [TOMBSTONES]: "id" };
 
 // UPGRADES[n] moves a database from version n to n+1.
 const UPGRADES = [
@@ -23,6 +25,11 @@ const UPGRADES = [
     db.createObjectStore("myIdeas", { keyPath: KEY_PATHS.myIdeas });
     // days: { id: "YYYY-MM-DD", ideaId, answered }.
     db.createObjectStore("days", { keyPath: KEY_PATHS.days });
+  },
+  (db) => {
+    // v2 (phase 2, notes sync): tombstones, so a delete travels through sync:
+    // { id: "<store>:<key as JSON>", store, key, at (ISO time deleted) }.
+    db.createObjectStore(TOMBSTONES, { keyPath: KEY_PATHS[TOMBSTONES] });
   },
 ];
 
@@ -66,11 +73,69 @@ export async function get(store, key) {
   return result(db.transaction(store).objectStore(store).get(key));
 }
 
+export async function getAll(store) {
+  const db = await openDB();
+  return result(db.transaction(store).objectStore(store).getAll());
+}
+
+// The owner's stores: every write through putMine/delMine stamps editedAt or
+// leaves a tombstone, so sync's merge (merge.js) keeps the newer edit and
+// carries deletes. The library and meta are written with plain put().
+const stamped = (record, at) => ({ ...record, editedAt: at });
+
 export async function put(store, record) {
   const db = await openDB();
   const tx = db.transaction(store, "readwrite");
   tx.objectStore(store).put(record);
   return done(tx);
+}
+
+// Several owner records (any stores) in one transaction, all stamped with the
+// same time: all land or none do. writes: [{ store, record }].
+export async function putMine(writes, at = new Date().toISOString()) {
+  const db = await openDB();
+  const tx = db.transaction([...new Set(writes.map((w) => w.store))], "readwrite");
+  for (const w of writes) tx.objectStore(w.store).put(stamped(w.record, at));
+  return done(tx);
+}
+
+// Delete owner records and leave a tombstone for each, so a sync removes
+// them from tane-data (and other devices) instead of bringing them back.
+// dels: [{ store, key }]; writes: owner records to stamp and put in the same transaction.
+export async function delMine(dels, writes = [], at = new Date().toISOString()) {
+  const db = await openDB();
+  const tx = db.transaction([...new Set([...dels.map((d) => d.store), ...writes.map((w) => w.store), TOMBSTONES])], "readwrite");
+  const ts = tx.objectStore(TOMBSTONES);
+  for (const { store, key } of dels) {
+    tx.objectStore(store).delete(key);
+    ts.put({ id: tombstoneId(store, key), store, key, at });
+  }
+  for (const w of writes) tx.objectStore(w.store).put(stamped(w.record, at));
+  return done(tx);
+}
+
+// Apply sync's merge result (merge.js diffStores) in one transaction, without
+// stamping or tombstoning (the merged records and tombstones carry their own).
+// A record that changed on this device since the dump the merge started from
+// is left alone: the next sync carries that edit. Returns how many records
+// (not counting tombstones) changed, and how many were skipped.
+export async function applyChanges(changes) {
+  if (!changes.length) return { applied: 0, skipped: 0 };
+  const db = await openDB();
+  const tx = db.transaction([...new Set(changes.map((c) => c.store))], "readwrite");
+  const finished = done(tx);
+  let applied = 0, skipped = 0;
+  for (const c of changes) {
+    const os = tx.objectStore(c.store);
+    const req = os.get(c.key);
+    req.onsuccess = () => {
+      if (JSON.stringify(req.result ?? null) !== JSON.stringify(c.before ?? null)) { skipped++; return; }
+      if (c.after) os.put(c.after); else os.delete(c.key);
+      if (c.store !== TOMBSTONES) applied++;
+    };
+  }
+  await finished;
+  return { applied, skipped };
 }
 
 export async function getMeta(key, fallback) {
@@ -90,9 +155,12 @@ export async function dump(names) {
 }
 
 // Replace the contents of every store named in `stores` in one transaction:
-// either the whole import lands or none of it does.
-export async function replaceAll(stores) {
+// either the whole import lands or none of it does. The tombstones are always
+// reset to the file's own (none when it has none), so this device's old
+// deletes can never drop imported records on the next sync.
+export async function replaceAll(fileStores) {
   const db = await openDB();
+  const stores = withTombstones(fileStores);
   const names = Object.keys(stores);
   const tx = db.transaction(names, "readwrite");
   const finished = done(tx);

@@ -36,6 +36,7 @@ const FLOORS = [
   ["accent-ink", ["accent"], 4.5],
   ["ink", ["mine-soft", "demo-soft"], 7],
   ["mine", ["mine-soft"], 4.5],
+  ["mine-ink", ["mine"], 4.5],
   ["muted", ["mine-soft"], 4.5],
   ["line", ["bg", "surface"], 1.25],
   ["surface", ["bg"], 1.03],

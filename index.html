@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.github.com; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>tane</title>
-  <meta name="description" content="Explore the ideas from your saved videos, from big areas down to single ideas, and how they connect.">
+  <meta name="description" content="Explore the ideas from your saved videos, from big areas down to single ideas, and how they connect, and write your own next to them.">
   <meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#14130f" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,12 +30,24 @@
     <a href="./#explore">Leave demo</a>
   </div>
 
-  <!-- One view at a time; tabs (Today, Mine) join Explore in later phases (router.js TABS). -->
+  <!-- One view at a time; Today joins Explore and Mine in a later phase (router.js TABS). -->
   <main id="view" tabindex="-1"></main>
   <div id="announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div id="toast" class="toast" aria-hidden="true" hidden></div>
+
+  <button id="note-btn" class="fab" type="button" aria-label="Write a note" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <nav class="tabs" aria-label="Tabs">
+    <a href="#explore" data-tab="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Explore</a>
+    <a href="#mine" data-tab="mine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19.5h4L19.5 9a2.8 2.8 0 0 0-4-4L5 15.5z"/><path d="M13.5 7l3.5 3.5"/></svg>Mine</a>
+  </nav>
 
   <dialog id="data-dialog" aria-labelledby="data-title">
     <div class="sheet" id="data-sheet"></div>
+  </dialog>
+  <dialog id="note-dialog" class="note-dialog" aria-labelledby="note-title">
+    <div class="sheet mine-sheet" id="note-sheet"></div>
   </dialog>
 
   <input id="import-file" type="file" accept="application/json,.json" hidden>
