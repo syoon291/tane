@@ -27,6 +27,8 @@ Plain ES modules, no framework. `app.js` boots, picks the library, and renders `
 | `#explore/area/<id>` | An area's themes |
 | `#explore/theme/<id>` | A theme's ideas |
 | `#explore/idea/<id>` | An idea |
+| `#explore/discussions` | Claude's discussions (tensions between ideas) |
+| `#explore/discussion/<id>` | One discussion |
 | `#mine` | Mine: what the owner wrote ([notes.md](notes.md#mine-tab-mine-viewjs)) |
 | `#mine/idea/<id>` | One of the owner's own ideas |
 
@@ -38,6 +40,8 @@ Ids are URI-encoded. Every row and breadcrumb is a real link, so browser back (a
 - **Area**: its themes with "N ideas · from M videos".
 - **Theme**: its active ideas (claim, "from N videos").
 - **Idea**: the claim (and detail when present), then the source block: the videos (title, creator, summary, key points, quotes, "Open in TikTok" with `target="_blank" rel="noopener noreferrer"`), connected ideas grouped by kind (Supports / Contradicts / Builds on, each with a text label, a shaped mark and its color, the direction, and the one-line why), "Write about it" prompts, and "Part of" (core beliefs and threads, a thread's title above its question). Each video and quote has "+ Note", each question "Write". After the source block, a separate "Your notes" section in the `--mine` style: the owner's own ideas and notes linked to this idea (or one of its videos or quotes), newest first, each with "You · <date>" and its kind ("Disagrees with this"), and "Write a note". Area and theme pages show "Your notes" only when something links there.
+- **Claude's take**: area, theme and idea pages carry a collapsed `<details>` "Claude's take" right under the title/summary, in the `--claude` style with a "Claude · perspective" label and a sparkle mark, apart from both the videos' block and "Your notes". Opened: the verdict (word, never color alone), the take, "A better version" when there is one, "Claude asks" and Reply (see [notes.md](notes.md#replying-to-claudes-take)); an idea page also lists the discussions it is a side of. An opened take stays open through a background re-render (`data-keep-open`). Pages show no section when Claude has nothing on the item.
+- **Discussions**: a `--claude` row under the areas leads to the list; a discussion page shows its sides as regular idea rows ("from the videos"), Claude's take collapsed, Reply, and "Your notes" (replies to it).
 - Retired ideas are left out of lists but open by id with a "retired" badge; when their theme is gone the breadcrumb is Areas › idea.
 
 ## Breadcrumb

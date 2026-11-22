@@ -1,6 +1,9 @@
 // Explore as a drill-down list: Areas > area (its themes) > theme (its ideas)
 // > idea (claim, the videos behind it, its links, prompts, threads and core
-// beliefs, and a separate "Your notes" section). Each function returns the
+// beliefs, and a separate "Your notes" section). Area, theme and idea pages
+// also carry "Claude's take", collapsed: a third voice in its own --claude
+// style, apart from both the videos and the owner. Discussions (tensions
+// Claude sees between ideas) have a list and a page of their own. Each function returns the
 // HTML for #view; every screen starts with a breadcrumb and one h2 that the
 // app focuses after navigation. No DOM access here, so it renders under `node --test`.
 import { esc } from "./ui.js";
@@ -28,6 +31,31 @@ function crumbs(items) {
   return `<nav class="crumbs" aria-label="Breadcrumb"><ol>${li}</ol></nav>`;
 }
 
+// Claude's take. verdict text always goes with its word, never color alone.
+export const VERDICT_LABEL = { "holds up": "Holds up", mixed: "Mixed", "push back": "Push back" };
+const VERDICT_CLASS = { "holds up": "holds", mixed: "mixed", "push back": "push" };
+const claudeLabel = (what = "perspective") => `<span class="claude-label"><span class="claude-mark" aria-hidden="true"></span>Claude · ${what}</span>`;
+const replyBtn = (mine, type, id, on) => mine ? `<button class="btn mine-btn reply-btn" type="button" data-act="reply" data-type="${type}" data-id="${esc(id)}">Reply<span class="visually-hidden"> to Claude's take on ${esc(on)}</span></button>` : "";
+
+// The collapsed "Claude's take" on an area, theme or idea page ("" when
+// Claude has nothing on it). on: the item's name, for screen readers.
+export function claudeTake(ix, targetId, mine, on) {
+  const p = ix.perspectiveOf(targetId);
+  const discs = ix.idea(targetId) ? ix.discussionsOf(targetId) : [];
+  if (!p && !discs.length) return "";
+  const body = p ? `
+      ${p.verdict ? `<p class="verdict verdict-${VERDICT_CLASS[p.verdict]}"><span class="visually-hidden">Verdict: </span>${esc(VERDICT_LABEL[p.verdict])}</p>` : ""}
+      <p class="take">${esc(p.take)}</p>
+      ${p.better ? `<h4>A better version</h4><p class="better">${esc(p.better)}</p>` : ""}
+      ${p.question ? `<h4>Claude asks</h4><p class="claude-q">${esc(p.question)}</p>` : ""}
+      ${replyBtn(mine, "perspective", p.id, on)}` : "";
+  const also = discs.length ? `<h4>In Claude's discussions</h4><ul class="claude-discs">${discs.map((d) => `<li><a href="${hrefFor("discussion", d.id)}">${esc(d.title)}</a></li>`).join("")}</ul>` : "";
+  return `<details class="claude-take" data-keep-open="take-${esc(targetId)}">
+    <summary>${claudeLabel()}<span class="claude-title">Claude's take</span></summary>
+    <div class="claude-body">${body}${also}</div>
+  </details>`;
+}
+
 const heading = (text, cls = "") => `<h2 class="page-title ${cls}" tabindex="-1" data-focus>${esc(text)}</h2>`;
 const AREAS = { label: "Areas", href: hrefFor() };
 
@@ -46,6 +74,11 @@ export function areasPage(ix, sourceLine = "") {
     ${heading("Areas")}
     <p class="sub">${plural(t.areas, "area")} · ${plural(t.themes, "theme")} · ${plural(t.ideas, "idea")} from ${plural(t.videos, "video")}</p>
     ${items ? `<ul class="rows">${items}</ul>` : `<p class="card empty">This library has no areas yet.</p>`}
+    ${ix.discussions.length ? `<h3 id="discs-h">Discussions</h3><ul class="rows" aria-labelledby="discs-h"><li><a class="row claude-row" href="${hrefFor("discussions")}">
+      ${claudeLabel("discussions")}
+      <span class="row-title">Where ideas pull against each other</span>
+      <span class="row-meta">${plural(ix.discussions.length, "discussion")}</span>
+    </a></li></ul>` : ""}
     ${sourceLine ? `<p class="hint source-line">${sourceLine}</p>` : ""}`;
 }
 
@@ -65,6 +98,7 @@ export function areaPage(ix, areaId, mine) {
     <p class="eyebrow">Area</p>
     ${heading(a.name)}
     ${a.summary ? `<p class="sub">${esc(a.summary)}</p>` : ""}
+    ${claudeTake(ix, a.id, mine, a.name)}
     <h3 id="themes-h">Themes</h3>
     ${items ? `<ul class="rows" aria-labelledby="themes-h">${items}</ul>` : `<p class="card empty">No themes in this area yet.</p>`}
     ${yourNotes("area", a.id, ix, mine)}`;
@@ -83,6 +117,7 @@ export function themePage(ix, themeId, mine) {
     <p class="eyebrow">Theme</p>
     ${heading(t.name)}
     ${t.summary ? `<p class="sub">${esc(t.summary)}</p>` : ""}
+    ${claudeTake(ix, t.id, mine, t.name)}
     <h3 id="ideas-h">Ideas</h3>
     ${items ? `<ul class="rows" aria-labelledby="ideas-h">${items}</ul>` : `<p class="card empty">No ideas in this theme yet.</p>`}
     ${yourNotes("theme", t.id, ix, mine)}`;
@@ -150,6 +185,7 @@ export function ideaPage(ix, ideaId, mine) {
     ${retired ? `<p class="hint">This idea is no longer in the library's lists. It stays here so anything that points to it still opens.</p>` : ""}
     ${i.detail ? `<p class="detail">${esc(i.detail)}</p>` : ""}
     <p class="row-meta">from ${plural(videos.length, "video")}</p>
+    ${claudeTake(ix, i.id, mine, shorten(i.claim))}
 
     <div class="source">
       ${videos.length ? `<section class="block" aria-labelledby="videos-h">
@@ -162,6 +198,51 @@ export function ideaPage(ix, ideaId, mine) {
     </div>
 
     ${yourNotes("idea", i.id, ix, mine, { always: true })}`;
+}
+
+const DISCUSSIONS = { label: "Discussions", href: hrefFor("discussions") };
+
+export function discussionsPage(ix) {
+  const items = ix.discussions.map((d) => `<li><a class="row claude-row" href="${hrefFor("discussion", d.id)}">
+      <span class="row-title">${esc(d.title)}</span>
+      <span class="row-meta">between ${plural(d.sides.length, "idea")}</span>
+    </a></li>`).join("");
+  return `
+    ${crumbs([AREAS, { label: "Discussions" }])}
+    <p class="eyebrow">${claudeLabel("discussions")}</p>
+    ${heading("Discussions")}
+    <p class="sub">Places where ideas from your videos pull against each other, as Claude sees them. Open one to see both sides and reply.</p>
+    ${items ? `<ul class="rows">${items}</ul>` : `<p class="card empty">No discussions in this library yet.</p>`}`;
+}
+
+export function discussionPage(ix, id, mine) {
+  const d = ix.discussion(id);
+  if (!d) return notFound("That discussion is not in the library.");
+  const sides = d.sides.map((s, n) => {
+    const i = ix.idea(s);
+    return `<li><a class="row" href="${hrefFor("idea", i.id)}">
+      <span class="row-meta">Side ${n + 1}</span>
+      <span class="row-title claim">${esc(i.claim)}</span>
+      <span class="row-meta">from ${plural(ix.ideaCount(i.id), "video")}${i.status === "retired" ? " · retired" : ""}</span>
+    </a></li>`;
+  }).join("");
+  return `
+    ${crumbs([AREAS, DISCUSSIONS, { label: shorten(d.title) }])}
+    <p class="eyebrow">${claudeLabel("discussion")}</p>
+    ${heading(d.title, "claude-heading")}
+    <div class="source">
+      <h3 id="sides-h">${d.sides.length === 2 ? "The two sides" : "The sides"}, from the videos</h3>
+      <ul class="rows" aria-labelledby="sides-h">${sides}</ul>
+    </div>
+    <details class="claude-take" data-keep-open="disc-${esc(d.id)}">
+      <summary>${claudeLabel()}<span class="claude-title">Claude's take</span></summary>
+      <div class="claude-body">
+        <p class="take">${esc(d.take)}</p>
+        ${d.question ? `<h4>Claude asks</h4><p class="claude-q">${esc(d.question)}</p>` : ""}
+        ${replyBtn(mine, "discussion", d.id, d.title)}
+      </div>
+    </details>
+    ${yourNotes("discussion", d.id, ix, mine, { always: true })}`;
 }
 
 export function notFound(message) {
@@ -184,5 +265,7 @@ export function renderExplore(route, ix, sourceLine, mine) {
   if (route.level === "area") return areaPage(ix, route.id, mine);
   if (route.level === "theme") return themePage(ix, route.id, mine);
   if (route.level === "idea") return ideaPage(ix, route.id, mine);
+  if (route.level === "discussions") return discussionsPage(ix);
+  if (route.level === "discussion") return discussionPage(ix, route.id, mine);
   return areasPage(ix, sourceLine);
 }

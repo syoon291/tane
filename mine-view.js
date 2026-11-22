@@ -4,7 +4,7 @@
 // Everything here wears the --mine style and a "You · <date>" label. No DOM
 // access, so it renders under `node --test`.
 import { esc, day } from "./ui.js";
-import { resolveLink, searchMine, sortNewest, KIND_LABEL, youLabel, mineHref } from "./notes.js";
+import { resolveLink, searchMine, sortNewest, KIND_LABEL, youLabel, mineHref, replyLink, isReply, isTakeType } from "./notes.js";
 import { plural } from "./library.js";
 
 // mine: { notes, ideas, idea(id), note(id), about(type, id) } (app.js mineApi).
@@ -14,12 +14,22 @@ const heading = (text, cls = "") => `<h2 class="page-title ${cls}" tabindex="-1"
 // A record's links. `here` ({ type, id }): the item whose page this is; its
 // link is shown as a kind line ("Disagrees with this") instead of a row.
 function linkList(rec, ix, mine, here) {
-  const items = (rec.links || []).filter((l) => !(here && l.type === here.type && l.to === here.id)).map((l) => {
+  // The take a reply answers shows in its own line (replyLine), not here.
+  const items = (rec.links || []).filter((l) => !isTakeType(l.type) && !(here && l.type === here.type && l.to === here.id)).map((l) => {
     const r = resolveLink(l, ix, mine);
     const name = r.href ? `<a href="${esc(r.href)}">${esc(r.label)}</a>` : `<span class="${r.missing ? "missing" : ""}">${esc(r.label)}</span>`;
     return `<li class="${r.source ? "to-source" : "to-mine"}"><span class="link-kind">${esc(KIND_LABEL[l.kind])}</span> ${name} <span class="link-type">${esc(r.typeLabel)}${r.retired ? " · retired" : ""}</span></li>`;
   }).join("");
   return items ? `<ul class="mine-links" aria-label="Linked to">${items}</ul>` : "";
+}
+
+// "Replying to Claude's take on <item>": what a reply answers.
+function replyLine(rec, ix, mine) {
+  const l = replyLink(rec);
+  if (!l) return "";
+  const r = resolveLink(l, ix, mine);
+  const name = r.href ? `<a href="${esc(r.href)}">${esc(r.label)}</a>` : `<span class="missing">${esc(r.label)}</span>`;
+  return `<p class="reply-to"><span class="claude-mark" aria-hidden="true"></span>Replying to ${name}</p>`;
 }
 
 function hereLine(rec, here) {
@@ -31,6 +41,7 @@ export function noteCard(n, ix, mine, here = null) {
   const idea = n.ideaId ? mine.idea(n.ideaId) : null;
   return `<li class="mine-card note">
     <p class="you">${esc(youLabel(n.createdAt, day))}${n.editedAt && day(n.editedAt) !== day(n.createdAt) ? ` · edited ${esc(day(n.editedAt))}` : ""}</p>
+    ${replyLine(n, ix, mine)}
     ${hereLine(n, here)}
     <p class="mine-text">${esc(n.text)}</p>
     ${linkList(n, ix, mine, here)}
@@ -43,6 +54,7 @@ export function noteCard(n, ix, mine, here = null) {
 export function ideaCard(m, ix, mine, here = null) {
   return `<li class="mine-card idea">
     <p class="you"><span class="mine-badge">Your idea</span> ${esc(youLabel(m.createdAt, day))}</p>
+    ${replyLine(m, ix, mine)}
     ${hereLine(m, here)}
     <a class="mine-idea-title" href="${esc(mineHref(m.id))}">${esc(m.text)}</a>
     ${linkList(m, ix, mine, here)}
@@ -63,28 +75,35 @@ export function yourNotes(type, id, ix, mine, { always = false } = {}) {
     </section>`;
 }
 
+// Mine's filters: everything, or only replies to Claude's takes.
+export const FILTERS = { all: "Everything", replies: "Replies to Claude" };
+const filtered = (list, filter) => (filter === "replies" ? list.filter(isReply) : list);
+
 // The results part of the Mine tab (re-rendered on each search keystroke, so
 // the search box itself keeps focus).
-export function mineResults(ix, mine, query = "") {
-  const ideas = searchMine(query, sortNewest(mine.ideas), ix, mine);
-  const notes = searchMine(query, sortNewest(mine.notes), ix, mine);
+export function mineResults(ix, mine, query = "", filter = "all") {
+  const ideas = searchMine(query, filtered(sortNewest(mine.ideas), filter), ix, mine);
+  const notes = searchMine(query, filtered(sortNewest(mine.notes), filter), ix, mine);
   if (!mine.ideas.length && !mine.notes.length) {
     return `<p class="card empty">Nothing written yet. Tap <b>+</b> on any screen to write a note; it links itself to what is on screen.</p>`;
   }
-  if (query.trim() && !ideas.length && !notes.length) return `<p class="card empty">Nothing you wrote matches “${esc(query.trim())}”.</p>`;
+  if (query.trim() && !ideas.length && !notes.length) return `<p class="card empty">Nothing you wrote matches “${esc(query.trim())}”${filter === "replies" ? " among your replies to Claude" : ""}.</p>`;
+  if (filter === "replies" && !ideas.length && !notes.length) return `<p class="card empty">No replies to Claude yet. Open “Claude's take” on an area, theme or idea and tap Reply.</p>`;
   return `
     ${ideas.length ? `<section aria-labelledby="my-ideas-h"><h3 id="my-ideas-h">Your ideas <span class="count">${ideas.length}</span></h3><ul class="mine-list">${ideas.map((m) => ideaCard(m, ix, mine)).join("")}</ul></section>` : ""}
     ${notes.length ? `<section aria-labelledby="notes-h"><h3 id="notes-h">Notes <span class="count">${notes.length}</span></h3><ul class="mine-list">${notes.map((n) => noteCard(n, ix, mine)).join("")}</ul></section>` : ""}`;
 }
 
 // syncLine: a short status of the notes sync (already escaped HTML), or "".
-export function minePage(ix, mine, { query = "", syncLine = "" } = {}) {
+export function minePage(ix, mine, { query = "", syncLine = "", filter = "all" } = {}) {
   const total = mine.ideas.length + mine.notes.length;
+  const filters = total ? `<div class="filters" role="group" aria-label="Show">${Object.entries(FILTERS).map(([k, label]) => `<button class="chip${k === "replies" ? " chip-claude" : ""}" type="button" data-act="mine-filter" data-id="${k}" aria-pressed="${k === filter}">${esc(label)}</button>`).join("")}</div>` : "";
   return `
     ${heading("Mine")}
     <p class="sub">Your own notes and ideas, newest first, kept apart from what the videos say.${total ? ` ${esc(plural(mine.ideas.length, "idea"))} · ${esc(plural(mine.notes.length, "note"))}.` : ""}</p>
     ${total ? `<div class="search"><label for="mine-q" class="visually-hidden">Search what you wrote</label><input id="mine-q" type="search" placeholder="Search what you wrote" value="${esc(query)}" autocomplete="off"></div>` : ""}
-    <div id="mine-results" aria-live="polite">${mineResults(ix, mine, query)}</div>
+    ${filters}
+    <div id="mine-results" aria-live="polite">${mineResults(ix, mine, query, filter)}</div>
     ${syncLine ? `<p class="hint sync-line">${syncLine}</p>` : ""}
     <section class="block export" aria-labelledby="export-h">
       <h3 id="export-h">Export</h3>

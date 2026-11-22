@@ -3,7 +3,7 @@
 // more, remove them for a free-standing thought), "Make this an idea", and
 // delete. The owner's words only ever go to the owner's stores (mine-store.js).
 import { $, esc, day, closeBtn, announce } from "./ui.js";
-import { KINDS, KIND_LABEL, TYPE_LABEL, addLink, removeLink, setKind, resolveLink, linkTargets, makeNote, youLabel, mineHref } from "./notes.js";
+import { KINDS, KIND_LABEL, TYPE_LABEL, addLink, removeLink, setKind, resolveLink, linkTargets, makeNote, youLabel, mineHref, isTakeType } from "./notes.js";
 
 const dialog = () => $("#note-dialog");
 const sheet = () => $("#note-sheet");
@@ -21,7 +21,13 @@ export function initNoteSheet(appApi) {
     const act = el.dataset.act;
     if (act === "close") { tryClose(); return; }
     if (act === "add-link") { showSearch(); return; }
-    if (act === "unlink") { draft.links = removeLink(draft.links, { type: el.dataset.type, to: el.dataset.to }); renderLinks(); $("#add-link-btn")?.focus(); return; }
+    if (act === "unlink") {
+      draft.links = removeLink(draft.links, { type: el.dataset.type, to: el.dataset.to });
+      // Removing the take link turns a reply back into a plain note: redraw the title and "Claude asks" too.
+      if (isTakeType(el.dataset.type)) render(); else renderLinks();
+      $("#add-link-btn")?.focus();
+      return;
+    }
     if (act === "pick") {
       draft.links = addLink(draft.links, { type: el.dataset.type, to: el.dataset.to, kind: "about" });
       $("#link-q").value = "";
@@ -107,8 +113,18 @@ function promptText(id) {
   return "";
 }
 
+// The take this draft replies to, from the library: { question, label } or null.
+function replyTo() {
+  const l = draft.links.find((x) => isTakeType(x.type));
+  const ix = app.index();
+  if (!l || !ix) return null;
+  const t = l.type === "perspective" ? ix.perspective(l.to) : ix.discussion(l.to);
+  return t ? { question: t.question, label: resolveLink(l, ix).label } : null;
+}
+
 function title() {
   if (draft.mode === "idea") return "Your idea";
+  if (!draft.rec && replyTo()) return "Reply to Claude";
   return draft.rec ? "Your note" : "New note";
 }
 
@@ -116,11 +132,13 @@ function render() {
   const mine = app.mine.api(app.index());
   const rec = draft.rec;
   const q = promptText(draft.promptId);
+  const reply = draft.mode === "note" ? replyTo() : null;
   const promoted = draft.mode === "note" && rec?.ideaId ? mine.idea(rec.ideaId) : null;
   sheet().innerHTML = `
     <div class="sheet-head"><h2 id="note-title">${esc(title())}</h2>${closeBtn}</div>
     <p class="you">${rec ? esc(youLabel(rec.createdAt, day)) : "You · now"}${app.mine.api().demo ? " · demo: not saved" : ""}</p>
     ${q ? `<p class="prompt-q"><span class="eyebrow">Question from the videos</span>${esc(q)}</p>` : ""}
+    ${reply?.question ? `<p class="prompt-q claude-ask"><span class="claude-label"><span class="claude-mark" aria-hidden="true"></span>Claude asks</span>${esc(reply.question)}</p>` : ""}
     <form id="note-form" class="note-form">
       <label for="note-text">${draft.mode === "idea" ? "Your idea, in a line or two" : "Your words"}</label>
       <textarea id="note-text" rows="${draft.mode === "idea" ? 3 : 6}" autocapitalize="sentences">${esc(draft.text)}</textarea>
@@ -144,11 +162,15 @@ function renderLinks() {
   const rows = draft.links.map((l, i) => {
     const r = resolveLink(l, ix, mine);
     const kinds = KINDS.map((k) => `<option value="${esc(k)}"${k === l.kind ? " selected" : ""}>${esc(KIND_LABEL[k])}</option>`).join("");
-    return `<li class="${r.source ? "to-source" : "to-mine"}">
+    // A reply's link to the take has one kind: no picker.
+    const kindCtl = isTakeType(l.type)
+      ? `<span class="reply-kind">${esc(KIND_LABEL.reply)}</span>`
+      : `<label class="visually-hidden" for="kind-${i}">How your note relates to ${esc(r.label)}</label>
+        <select id="kind-${i}" data-kind-for="${esc(`${l.type}|${l.to}`)}">${kinds}</select>`;
+    return `<li class="${r.claude ? "to-claude" : r.source ? "to-source" : "to-mine"}">
       <div class="link-what"><span class="link-type">${esc(r.typeLabel)}</span><span class="link-label${r.missing ? " missing" : ""}">${esc(r.label)}</span></div>
       <div class="link-ctl">
-        <label class="visually-hidden" for="kind-${i}">How your note relates to ${esc(r.label)}</label>
-        <select id="kind-${i}" data-kind-for="${esc(`${l.type}|${l.to}`)}">${kinds}</select>
+        ${kindCtl}
         <button class="icon-btn" type="button" data-act="unlink" data-type="${esc(l.type)}" data-to="${esc(l.to)}" aria-label="Remove the link to ${esc(r.label)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
     </li>`;

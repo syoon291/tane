@@ -13,10 +13,15 @@
 //   links   [{ from, to, kind: "supports" | "contradicts" | "extends", why }]
 //   threads [{ id, title?, question, ideaIds }]
 //   core    [{ id, belief, ideaIds }]
+//   perspectives [{ id, target, verdict: "holds up" | "mixed" | "push back", take, better?, question }]
+//   discussions  [{ id, title, sides: [idea ids], take, question }]
+// perspectives and discussions are Claude's take (written ahead of time on the
+// computer, never in the app): a third voice, read-only like the rest.
 
 export const SCHEMA = "tane-library";
 export const VERSION = 1;
 export const LINK_KINDS = ["supports", "contradicts", "extends"];
+export const VERDICTS = ["holds up", "mixed", "push back"];
 
 const isObj = (v) => !!v && typeof v === "object" && !Array.isArray(v);
 const str = (v) => (typeof v === "string" ? v.trim() : "");
@@ -57,7 +62,7 @@ export function parseLibrary(input) {
   for (const k of ["areas", "themes", "ideas", "videos"]) {
     if (!Array.isArray(data[k])) return { ok: false, error: `The library file has no "${k}" list.` };
   }
-  for (const k of ["links", "threads", "core"]) {
+  for (const k of ["links", "threads", "core", "perspectives", "discussions"]) {
     if (data[k] !== undefined && !Array.isArray(data[k])) return { ok: false, error: `The library file's "${k}" is not a list.` };
   }
 
@@ -87,6 +92,14 @@ export function parseLibrary(input) {
       ? { from: id(l.from), to: id(l.to), kind: l.kind, why: str(l.why) } : null), c),
     threads: cleanList(data.threads, (t) => (str(t.question) ? { id: id(t.id), title: str(t.title), question: str(t.question), ideaIds: ids(t.ideaIds) } : null), c),
     core: cleanList(data.core, (b) => (str(b.belief) ? { id: id(b.id), belief: str(b.belief), ideaIds: ids(b.ideaIds) } : null), c),
+    // A take without text or a target is skipped; an unknown verdict is dropped, the take kept.
+    perspectives: cleanList(data.perspectives, (p) => (str(p.take) && id(p.target) ? {
+      id: id(p.id), target: id(p.target), verdict: VERDICTS.includes(p.verdict) ? p.verdict : "",
+      take: str(p.take), better: str(p.better), question: str(p.question),
+    } : null), c),
+    discussions: cleanList(data.discussions, (d) => (str(d.take) && str(d.title) ? {
+      id: id(d.id), title: str(d.title), sides: ids(d.sides), take: str(d.take), question: str(d.question),
+    } : null), c),
   };
   return { ok: true, library, skipped: c.skipped };
 }
@@ -150,6 +163,25 @@ export function buildIndex(library) {
   for (const v of library.videos) for (const q of v.quotes) if (q.id && !quote.has(q.id)) quote.set(q.id, { ...q, videoId: v.id });
   for (const i of idea.values()) for (const v of i.videoIds) push(ideasByVideo, v, i);
 
+  // Claude's take: one per area, theme or idea (the first wins); a take on
+  // something not in the library is dropped. A discussion keeps the sides that
+  // exist and needs two of them.
+  const perspective = new Map(), perspectiveByTarget = new Map();
+  const typeOf = (k) => (area.has(k) ? "area" : theme.has(k) ? "theme" : idea.has(k) ? "idea" : "");
+  for (const p of library.perspectives ?? []) {
+    const type = typeOf(p.target);
+    if (!type || perspectiveByTarget.has(p.target)) continue;
+    const full = { ...p, type };
+    perspective.set(p.id, full);
+    perspectiveByTarget.set(p.target, full);
+  }
+  const discussions = (library.discussions ?? [])
+    .map((d) => ({ ...d, sides: [...new Set(d.sides.filter((i) => idea.has(i)))] }))
+    .filter((d) => d.sides.length >= 2);
+  const discussion = new Map(discussions.map((d) => [d.id, d]));
+  const discussionsByIdea = new Map();
+  for (const d of discussions) for (const i of d.sides) push(discussionsByIdea, i, d);
+
   return {
     generatedAt: library.generatedAt,
     areas,
@@ -167,6 +199,11 @@ export function buildIndex(library) {
     linksOf: (ideaId) => linksByIdea.get(ideaId) ?? [],
     threadsOf: (ideaId) => threadsByIdea.get(ideaId) ?? [],
     coreOf: (ideaId) => coreByIdea.get(ideaId) ?? [],
+    perspective: (k) => perspective.get(k) ?? null,
+    perspectiveOf: (targetId) => perspectiveByTarget.get(targetId) ?? null,
+    discussions,
+    discussion: (k) => discussion.get(k) ?? null,
+    discussionsOf: (ideaId) => discussionsByIdea.get(ideaId) ?? [],
     // The saved-video folder a theme came from (for later filters).
     folderOf: (themeId) => theme.get(themeId)?.folder || "",
     ideaCount: (ideaId) => idea.get(ideaId)?.videoIds.length ?? 0,
@@ -177,7 +214,7 @@ export function buildIndex(library) {
       const t = theme.get(idea.get(ideaId)?.themeId) ?? null;
       return { theme: t, area: t ? area.get(t.areaId) ?? null : null };
     },
-    totals: { areas: areas.length, themes: theme.size, ideas: active.length, videos: new Set(active.flatMap((i) => i.videoIds)).size, threads: threads.length, core: core.length },
+    totals: { areas: areas.length, themes: theme.size, ideas: active.length, videos: new Set(active.flatMap((i) => i.videoIds)).size, threads: threads.length, core: core.length, perspectives: perspective.size, discussions: discussions.length },
   };
 }
 

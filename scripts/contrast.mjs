@@ -29,7 +29,7 @@ export function tokenBlocks(css) {
 }
 
 const SURFACES = ["bg", "surface", "surface-2"];
-const COLORED = ["accent", "supports", "contradicts", "extends", "mine"];
+const COLORED = ["accent", "supports", "contradicts", "extends", "mine", "claude"];
 const FLOORS = [
   ...["ink", "muted"].map((t) => [t, SURFACES, 7]),
   ...COLORED.map((t) => [t, SURFACES, 4.5]),
@@ -38,9 +38,26 @@ const FLOORS = [
   ["mine", ["mine-soft"], 4.5],
   ["mine-ink", ["mine"], 4.5],
   ["muted", ["mine-soft"], 4.5],
+  ["ink", ["claude-soft"], 7],
+  ["claude", ["claude-soft"], 4.5],
+  ["claude-ink", ["claude"], 4.5],
+  ["muted", ["claude-soft"], 4.5],
   ["line", ["bg", "surface"], 1.25],
   ["surface", ["bg"], 1.03],
 ];
+
+// The three voices (the videos' accent, the owner's, Claude's) must never be
+// confusable: their hues stay at least this many degrees apart.
+const VOICES = ["accent", "mine", "claude"];
+const MIN_HUE_GAP = 60;
+
+export function hue(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+  if (!d) return 0;
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
 
 // Returns a list of failures, empty when both themes meet their floors.
 export function contrastFailures(css) {
@@ -53,6 +70,11 @@ export function contrastFailures(css) {
         try { r = ratio(t[fg], t[bg]); } catch (e) { out.push(`${theme}: --${fg} on --${bg}: ${e.message}`); continue; }
         if (r < min) out.push(`${theme}: --${fg} ${t[fg]} on --${bg} ${t[bg]} is ${r.toFixed(2)}:1, needs ${min}:1`);
       }
+    }
+    for (const [i, a] of VOICES.entries()) for (const b of VOICES.slice(i + 1)) {
+      if (!t[a] || !t[b]) continue;
+      const gap = Math.abs(hue(t[a]) - hue(t[b]));
+      if (Math.min(gap, 360 - gap) < MIN_HUE_GAP) out.push(`${theme}: --${a} and --${b} are too close in hue to tell apart`);
     }
   }
   return out;

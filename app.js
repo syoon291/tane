@@ -12,7 +12,7 @@ import { REPO, LIBRARY_PATH, fetchLibrary, checkAccess, reloadDue, SyncError } f
 import { initDataSheet, openDataSheet, TOKEN_STEPS } from "./data-view.js";
 import { renderMine, mineResults } from "./mine-view.js";
 import { createMine } from "./mine-store.js";
-import { contextFor } from "./notes.js";
+import { contextFor, replyLinks, isTakeType } from "./notes.js";
 import { initNoteSheet, openNewNote, editNote, editIdea } from "./note-sheet.js";
 import { buildExport, toMarkdown, exportFileName } from "./export.js";
 
@@ -21,7 +21,7 @@ const TOKEN = "githubToken";
 
 // demo: the demo library is showing (never written to the store).
 // record: the cached library record from tane-data ({ id, data, loadedAt, source }).
-const state = { demo: false, linked: false, record: null, index: null, lastError: "", loading: false, failed: "", mineQuery: "" };
+const state = { demo: false, linked: false, record: null, index: null, lastError: "", loading: false, failed: "", mineQuery: "", mineFilter: "all" };
 // The owner's notes and own ideas (memory only in the demo). Set in boot().
 let mine = createMine({ demo: true });
 
@@ -158,17 +158,20 @@ function render() {
   const a = document.activeElement;
   const keep = a && view.contains(a) ? (a.id === "mine-q" ? "#mine-q" : a.getAttribute("href") ? `[href="${CSS.escape(a.getAttribute("href"))}"]` : a.dataset.act ? `[data-act="${CSS.escape(a.dataset.act)}"]${a.dataset.id ? `[data-id="${CSS.escape(a.dataset.id)}"]` : ""}` : a.hasAttribute("data-focus") ? "[data-focus]" : null) : null;
   const caret = a?.id === "mine-q" ? a.selectionStart : null;
+  // An opened "Claude's take" stays open through a re-render of the same page.
+  const opened = new Set([...view.querySelectorAll("details[data-keep-open][open]")].map((d) => d.dataset.keepOpen));
   const route = parseHash(location.hash);
   const api = mine.api(state.index);
   if (state.failed) {
     view.innerHTML = `<h2 class="page-title" tabindex="-1" data-focus>Something went wrong</h2><div class="card"><p>${esc(state.failed)}</p></div>`;
   } else if (route.tab === "mine") {
-    view.innerHTML = renderMine(route, state.index, api, { query: state.mineQuery, syncLine: syncLine() });
+    view.innerHTML = renderMine(route, state.index, api, { query: state.mineQuery, syncLine: syncLine(), filter: state.mineFilter });
   } else if (!state.index) {
     view.innerHTML = welcome();
   } else {
     view.innerHTML = renderExplore(route, state.index, sourceLine(), api);
   }
+  for (const d of view.querySelectorAll("details[data-keep-open]")) if (opened.has(d.dataset.keepOpen)) d.open = true;
   for (const t of document.querySelectorAll(".tabs a")) {
     if (t.dataset.tab === route.tab) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
   }
@@ -212,6 +215,7 @@ function quickNote() {
 function noteOn(el) {
   const route = parseHash(location.hash);
   const { context } = contextFor(route, state.index);
+  if (isTakeType(el.dataset.type)) { openNewNote({ links: replyLinks(state.index, el.dataset.type, el.dataset.id), context }); return; }
   openNewNote({ links: [{ type: el.dataset.type, to: el.dataset.id, kind: el.dataset.type === "myIdea" ? "builds on" : "about" }], context, promptId: el.dataset.prompt });
 }
 
@@ -229,7 +233,8 @@ view.addEventListener("click", (e) => {
   const act = el.dataset.act;
   if (act === "link") openDataSheet(true);
   if (act === "reload") { el.disabled = true; app.reload(); }
-  if (act === "note") noteOn(el);
+  if (act === "note" || act === "reply") noteOn(el);
+  if (act === "mine-filter") { state.mineFilter = el.dataset.id; render(); }
   if (act === "edit-note") editNote(el.dataset.id);
   if (act === "edit-idea") editIdea(el.dataset.id);
   if (act === "export-md") exportMine("md");
@@ -241,7 +246,7 @@ view.addEventListener("input", (e) => {
   if (e.target.id !== "mine-q") return;
   state.mineQuery = e.target.value;
   const out = $("#mine-results");
-  if (out) out.innerHTML = mineResults(state.index, mine.api(state.index), state.mineQuery);
+  if (out) out.innerHTML = mineResults(state.index, mine.api(state.index), state.mineQuery, state.mineFilter);
 });
 $("#data-btn").addEventListener("click", () => openDataSheet());
 $("#note-btn").addEventListener("click", quickNote);

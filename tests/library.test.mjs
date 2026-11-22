@@ -26,7 +26,7 @@ test("the demo library parses cleanly and has every feature", () => {
   assert.equal(r.ok, true);
   assert.equal(r.skipped, 0);
   const i = buildIndex(r.library);
-  assert.deepEqual(i.totals, { areas: 3, themes: 6, ideas: 15, videos: 12, threads: 2, core: 1 });
+  assert.deepEqual(i.totals, { areas: 3, themes: 6, ideas: 15, videos: 12, threads: 2, core: 1, perspectives: 24, discussions: 3 });
   const kinds = new Set(r.library.links.map((l) => l.kind));
   assert.deepEqual([...kinds].sort(), ["contradicts", "extends", "supports"]);
   assert.ok(r.library.ideas.some((x) => x.status === "retired"));

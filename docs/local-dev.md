@@ -37,5 +37,5 @@ None. The only secret is the owner's GitHub token, pasted into the app on the ph
 ## Scripts
 
 - `scripts/check.mjs` - the fast check (above).
-- `scripts/contrast.mjs` - contrast floors for the tokens in `styles.css` (including `--mine-ink` on `--mine`), used by the check.
+- `scripts/contrast.mjs` - contrast floors for the tokens in `styles.css` (including `--mine-ink` on `--mine` and the `--claude` set), and the hue gap that keeps the three voices (`--accent`, `--mine`, `--claude`) apart, used by the check.
 - `scripts/icons.mjs` (`npm run icons`) - draws `icons/icon.svg` and the 180/192/512 PNGs with no dependencies. Run after changing the mark.
