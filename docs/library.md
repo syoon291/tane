@@ -36,7 +36,7 @@ The source library is the read-only half of tane: ideas extracted from the owner
 
 ## Index (`buildIndex`)
 
-Lookups by id, children per parent (themes per area, active ideas per theme), links per idea in both directions (`dir: "out"` this idea → other, `"in"` other → this), threads and core beliefs per idea, and counts: videos per idea, ideas and distinct videos per theme and area, themes per area, totals. Dangling ids (a theme's missing area, an idea's missing theme or videos, a link or thread to a missing idea) are dropped, never fatal; a thread or core belief left with no ideas goes away. Retired ideas never appear in lists or counts but `idea(id)` finds them, and `parentsOf` returns nulls when their theme is gone.
+Lookups by id, children per parent (themes per area, active ideas per theme), links per idea in both directions (`dir: "out"` this idea → other, `"in"` other → this), threads and core beliefs per idea, quotes by id (with their video) and the ideas each video sits behind (so a note on a video or quote opens the idea page that shows it), the active ideas and the themes as lists (for the note link search), and counts: videos per idea, ideas and distinct videos per theme and area, themes per area, totals. Dangling ids (a theme's missing area, an idea's missing theme or videos, a link or thread to a missing idea) are dropped, never fatal; a thread or core belief left with no ideas goes away. Retired ideas never appear in lists or counts but `idea(id)` finds them, and `parentsOf` returns nulls when their theme is gone.
 
 ## Demo library
 

@@ -1,8 +1,8 @@
 // Offline support: the app shell is cached on install, then every same-origin
 // GET is served network first (fresh code when online), cache when offline.
 // The library itself is not here: it is cached in IndexedDB (db.js).
-const CACHE = "tane-v1";
-const SHELL = ["./", "index.html", "styles.css", "app.js", "ui.js", "db.js", "backup.js", "library.js", "router.js", "sync.js", "explore-view.js", "data-view.js", "demo/library.json", "manifest.webmanifest", "icons/icon.svg", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
+const CACHE = "tane-v2";
+const SHELL = ["./", "index.html", "styles.css", "app.js", "ui.js", "db.js", "backup.js", "library.js", "router.js", "sync.js", "explore-view.js", "data-view.js", "merge.js", "notes.js", "export.js", "mine-view.js", "mine-store.js", "note-sheet.js", "demo/library.json", "manifest.webmanifest", "icons/icon.svg", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));

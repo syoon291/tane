@@ -1,10 +1,10 @@
 // The Data sheet (header button): the link to tane-data (paste the token,
 // when the library was last loaded, Reload, unlink), the demo library, and
 // the JSON backup of the owner's own data.
-import { $, esc, when, closeBtn, announce } from "./ui.js";
-import { REPO, LIBRARY_PATH, looksLikeToken } from "./sync.js";
-import { buildBackup, backupFileName, parseBackup, countRecords, OWNER_STORES } from "./backup.js";
-import { dump, replaceAll } from "./db.js";
+import { $, esc, when, closeBtn, announce, downloadFile } from "./ui.js";
+import { REPO, LIBRARY_PATH, APP_PATH, looksLikeToken } from "./sync.js";
+import { buildBackup, backupFileName, parseBackup, countRecords, OWNER_STORES, FILE_STORES } from "./backup.js";
+import { dump, replaceAll, setDevice } from "./db.js";
 import { plural } from "./library.js";
 
 const dialog = () => $("#data-dialog");
@@ -96,6 +96,19 @@ function librarySection(st) {
   </section>`;
 }
 
+// Notes sync: what the owner writes goes to tane-data app/latest.json.
+function notesSection(st) {
+  if (st.demo || !st.linked) return "";
+  const s = app.mine.status;
+  return `<section class="sheet-sec" aria-labelledby="notes-sync-h">
+    <h3 id="notes-sync-h">Your notes</h3>
+    <p class="hint">What you write syncs to ${esc(REPO)} (file ${esc(APP_PATH)}) a few seconds after each change and when you open the app. Notes from another phone are merged in: the newer edit of a note wins, and deletes carry over.</p>
+    <dl class="facts"><div><dt>Last synced</dt><dd>${s.syncedAt ? esc(when(s.syncedAt)) : "not yet"}</dd></div></dl>
+    ${s.error ? `<p class="msg bad">${esc(s.error)}</p>` : ""}
+    <button class="btn" type="button" data-act="sync-notes">Sync now</button>
+  </section>`;
+}
+
 async function renderSheet() {
   const st = app.state;
   let counts = {};
@@ -105,11 +118,12 @@ async function renderSheet() {
     <div class="sheet-head"><h2 id="data-title">Data</h2>${closeBtn}</div>
     <p id="data-msg" class="msg" role="status" aria-live="polite"></p>
     ${librarySection(st)}
+    ${notesSection(st)}
     <section class="sheet-sec" aria-labelledby="backup-h">
       <h3 id="backup-h">Backup</h3>
-      <p class="hint">A JSON file of what you write in tane (${total ? esc(plural(total, "record")) : "nothing yet: notes arrive in the next update"}). The library is not in it (it reloads from tane-data), and neither is the token.</p>
+      <p class="hint">A JSON file of what you write in tane (${total ? esc(plural(total, "record")) : "nothing yet"}). The library is not in it (it reloads from tane-data), and neither is the token.${st.demo ? " Demo notes are never in it." : ""}</p>
       <button class="btn ghost" type="button" data-act="export">Export backup</button>
-      <button class="btn ghost" type="button" data-act="import">Import backup</button>
+      ${st.demo ? "" : `<button class="btn ghost" type="button" data-act="import">Import backup</button>`}
     </section>`;
 }
 
@@ -134,14 +148,14 @@ async function onAct(act) {
     await app.unlink();
     await renderSheet();
     say("Unlinked. The token is gone from this device.", "good");
+  } else if (act === "sync-notes") {
+    say("Syncing your notes…");
+    const out = await app.mine.sync();
+    await renderSheet();
+    say(out.message, out.ok ? "good" : "bad");
   } else if (act === "export") {
-    const file = buildBackup(await dump(OWNER_STORES));
-    const url = URL.createObjectURL(new Blob([JSON.stringify(file, null, 2)], { type: "application/json" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: backupFileName() });
-    document.body.append(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const file = buildBackup(await dump(FILE_STORES));
+    downloadFile(backupFileName(), JSON.stringify(file, null, 2), "application/json");
     say("Backup saved.", "good");
   } else if (act === "import") {
     $("#import-file").click();
@@ -159,10 +173,16 @@ async function onImportFile(e) {
   if (!r.ok) { say(r.error, "bad"); return; }
   const c = countRecords(r.backup.stores);
   const summary = OWNER_STORES.filter((k) => k in r.backup.stores).map((k) => `${k}: ${c[k]}`).join(", ");
-  if (!confirm(`Replace what you wrote on this device with this backup (${summary})? The library and the token are not touched.`)) return;
-  const stores = Object.fromEntries(OWNER_STORES.filter((k) => k in r.backup.stores).map((k) => [k, r.backup.stores[k]]));
+  // Linked: the next sync merges with tane-data, so notes only it has come back and its newer edits and deletes win.
+  const merges = app.mine?.status?.linked ? " The next sync merges it with tane-data: notes only tane-data has come back, and its newer edits and deletes win." : "";
+  if (!confirm(`Replace what you wrote on this device with this backup (${summary})? The library and the token are not touched.${merges}`)) return;
+  const stores = Object.fromEntries(FILE_STORES.filter((k) => k in r.backup.stores).map((k) => [k, r.backup.stores[k]]));
   try { await replaceAll(stores); }
   catch (err) { say(`Import failed, nothing changed: ${err?.message || err}`, "bad"); return; }
+  // Restored notes have not reached tane-data: keep them pending until a sync does.
+  try { await setDevice("notesPending", true); } catch {}
+  await app.mine.refresh();
+  app.mine.scheduleSync();
   await renderSheet();
   say("Backup imported.", "good");
   announce("Backup imported.");

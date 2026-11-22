@@ -17,7 +17,7 @@ GitHub Pages, source GitHub Actions. The URL is in `docs/docsic.json`. The repo 
 
 ## Offline (service worker)
 
-`sw.js` precaches the shell (`SHELL`: every module, `styles.css`, the manifest, icons and `demo/library.json`) and serves same-origin GETs network first with `cache: "no-cache"`, falling back to the cache offline. GitHub API calls are never cached by it: the library's offline copy lives in IndexedDB. Bump `CACHE` when the shell list changes so old caches are cleared.
+`sw.js` precaches the shell (`SHELL`: every module, `styles.css`, the manifest, icons and `demo/library.json`) and serves same-origin GETs network first with `cache: "no-cache"`, falling back to the cache offline. GitHub API calls are never cached by it: the library's offline copy lives in IndexedDB. Bump `CACHE` when the shell list changes so old caches are cleared (`tane-v2` since phase 2 added the notes modules).
 
 ## Owner steps
 

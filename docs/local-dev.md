@@ -30,12 +30,12 @@ None. The only secret is the owner's GitHub token, pasted into the app on the ph
 
 ## Testing
 
-- `npm test`: unit tests (Node's built-in runner, one file at a time) for the library schema and index, routing, the Explore screens, the GitHub calls (mocked fetch), backup, and the check script.
+- `npm test`: unit tests (Node's built-in runner, one file at a time) for the library schema and index, routing, the Explore and Mine screens, notes (links, context, search, promote), the export, the sync merge and tombstones, the GitHub calls including the notes sync (mocked fetch), backup, and the check script.
 - `npm run check`: the fast check (`scripts/check.mjs`): every module parses, the manifest is valid, every module and file is precached by `sw.js` and copied by the Pages workflow, the CSP is exact (scripts from this site only; network only to this site and `api.github.com`), only `sync.js` calls GitHub, no inline handlers or styles, the demo library is valid and made up (`@demo` creators and links), nothing token-shaped ships, and the color tokens meet their contrast floors (`scripts/contrast.mjs`).
 - Run them one after the other, never in parallel.
 
 ## Scripts
 
 - `scripts/check.mjs` - the fast check (above).
-- `scripts/contrast.mjs` - contrast floors for the tokens in `styles.css`, used by the check.
+- `scripts/contrast.mjs` - contrast floors for the tokens in `styles.css` (including `--mine-ink` on `--mine`), used by the check.
 - `scripts/icons.mjs` (`npm run icons`) - draws `icons/icon.svg` and the 180/192/512 PNGs with no dependencies. Run after changing the mark.

@@ -4,21 +4,26 @@
 //   #explore/area/<id>       an area's themes
 //   #explore/theme/<id>      a theme's ideas
 //   #explore/idea/<id>       an idea
+//   #mine                    everything the owner wrote
+//   #mine/idea/<id>          one of the owner's own ideas
 // Pure functions, unit-tested under `node --test`.
 
-// The tabs this version shows. Today and Mine join in later phases: add the
-// name here and a renderer in app.js. An unknown or not-yet-built tab opens Explore.
-export const TABS = ["explore"];
+// The tabs this version shows. Today joins in a later phase: add the name
+// here and a renderer in app.js. An unknown or not-yet-built tab opens Explore.
+export const TABS = ["explore", "mine"];
 export const LEVELS = ["area", "theme", "idea"];
+const TAB_LEVELS = { explore: LEVELS, mine: ["idea"] };
+const TAB_HOME = { explore: "areas", mine: "home" };
 const HOME = { tab: "explore", level: "areas", id: null };
 
 export function parseHash(hash = "") {
   const parts = String(hash).replace(/^#\/?/, "").split("/").filter(Boolean);
   if (!parts.length || !TABS.includes(parts[0])) return { ...HOME };
   const [tab, level, ...rest] = parts;
-  if (!LEVELS.includes(level) || !rest.length) return { tab, level: "areas", id: null };
+  const home = { tab, level: TAB_HOME[tab], id: null };
+  if (!TAB_LEVELS[tab].includes(level) || !rest.length) return home;
   let id;
-  try { id = decodeURIComponent(rest.join("/")); } catch { return { tab, level: "areas", id: null }; }
+  try { id = decodeURIComponent(rest.join("/")); } catch { return home; }
   return { tab, level, id };
 }
 
