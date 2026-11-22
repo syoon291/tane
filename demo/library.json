@@ -619,5 +619,213 @@
         "idea-0a1b0d"
       ]
     }
+  ],
+  "perspectives": [
+    {
+      "id": "persp-a1c3e5",
+      "target": "area-a1c3e5",
+      "verdict": "mixed",
+      "take": "These ideas agree that attention is scarce, then quietly disagree about what to do with it. Some say cut things out; others say stay with the empty time that is left. Both can be true, but not on the same afternoon.",
+      "question": "When did doing less last leave you feeling bored rather than rested?"
+    },
+    {
+      "id": "persp-b2d4f6",
+      "target": "area-b2d4f6",
+      "verdict": "holds up",
+      "take": "The common thread is that the self is made by small repeated acts and by the story told about them. That is a sturdy pair. The weak spot is that it can make change sound tidier than it is.",
+      "question": "Which story about yourself would you most like to retell?"
+    },
+    {
+      "id": "persp-c3e5a7",
+      "target": "area-c3e5a7",
+      "verdict": "holds up",
+      "take": "Listening first and arguing well are presented as one skill seen from two sides. That holds up: both ask you to take the other person seriously before you answer.",
+      "question": "Who do you find it hardest to listen to without planning a reply?"
+    },
+    {
+      "id": "persp-1a2b3c",
+      "target": "theme-1a2b3c",
+      "verdict": "mixed",
+      "take": "Doing less is good advice for someone whose days are crowded by choice. It reads differently when the crowding comes from other people. The theme rarely says which kind of crowding it means.",
+      "better": "Choose fewer things where the choice is yours, and protect them from what is not.",
+      "question": "Which of your commitments did you actually choose?"
+    },
+    {
+      "id": "persp-2b3c4d",
+      "target": "theme-2b3c4d",
+      "verdict": "holds up",
+      "take": "Treating boredom as a message rather than a problem is a useful turn. The ideas here stay close to ordinary experience and do not overclaim.",
+      "question": "What did the last bout of boredom seem to want from you?"
+    },
+    {
+      "id": "persp-3c4d5e",
+      "target": "theme-3c4d5e",
+      "verdict": "mixed",
+      "take": "Identity through small acts is persuasive, but the theme leans on it so hard that big changes start to look like a pile of small ones. Some changes are not.",
+      "better": "Small acts build the self you are already heading toward; turning around may need one larger decision first.",
+      "question": "Is there a change you keep trying to make in small steps that needs a bigger one?"
+    },
+    {
+      "id": "persp-4d5e6f",
+      "target": "theme-4d5e6f",
+      "verdict": "holds up",
+      "take": "Separating the past from the story about it gives real room to move without denying what happened. The ideas are careful about that line.",
+      "question": "Which failure have you told the same way for years?"
+    },
+    {
+      "id": "persp-5e6f7a",
+      "target": "theme-5e6f7a",
+      "verdict": "holds up",
+      "take": "Simple and well grounded: people want to feel heard, and a pause helps. The theme could say more about when advice is actually wanted.",
+      "question": "When did someone listen to you in a way you still remember?"
+    },
+    {
+      "id": "persp-6f7a8b",
+      "target": "theme-6f7a8b",
+      "verdict": "mixed",
+      "take": "The two ideas here pull in different directions, which is the point of the theme. Steelmanning is good practice for ideas; it can be cold when the argument is really about the relationship.",
+      "question": "In your last disagreement, was it about the topic or about the two of you?"
+    },
+    {
+      "id": "persp-0a1b01",
+      "target": "idea-0a1b01",
+      "verdict": "holds up",
+      "take": "Fewer things done with care usually do leave more room. The claim is modest and matches common experience.",
+      "question": "What would you drop first if you had to cut one thing this week?"
+    },
+    {
+      "id": "persp-0a1b02",
+      "target": "idea-0a1b02",
+      "verdict": "holds up",
+      "take": "Rest as part of the work, not a reward, is a healthy reframing. It avoids the trap of only resting once everything is finished, which never happens.",
+      "question": "How do you rest when the work is not done?"
+    },
+    {
+      "id": "persp-0a1b03",
+      "target": "idea-0a1b03",
+      "verdict": "mixed",
+      "take": "The cost of switching is real, but the size of it varies a lot by task. Some switching is cheap and even refreshing.",
+      "better": "Switching between demanding tasks costs more than it seems; light ones can be mixed freely.",
+      "question": "Which switches drain you, and which do not?"
+    },
+    {
+      "id": "persp-0a1b04",
+      "target": "idea-0a1b04",
+      "verdict": "holds up",
+      "take": "A busy calendar and a meaningful day are different things. The line is short and sticks.",
+      "question": "What made a recent full day feel empty?"
+    },
+    {
+      "id": "persp-0a1b05",
+      "target": "idea-0a1b05",
+      "verdict": "holds up",
+      "take": "Boredom often does point at an unmet want. Staying with it long enough to read it is the hard part, and the idea says so.",
+      "question": "What do you usually do in the first minute of boredom?"
+    },
+    {
+      "id": "persp-0a1b06",
+      "target": "idea-0a1b06",
+      "verdict": "mixed",
+      "take": "The phone does cover over boredom, but so do many other habits. Blaming one object makes the idea easy to agree with and easy to ignore.",
+      "better": "Any quick escape hides what boredom is saying; the phone is just the nearest one.",
+      "question": "What else do you reach for when nothing is happening?"
+    },
+    {
+      "id": "persp-0a1b07",
+      "target": "idea-0a1b07",
+      "verdict": "holds up",
+      "take": "The vote metaphor works because it is gentle: one vote does not decide anything, many do. It encourages without demanding perfection.",
+      "question": "What did today's small acts vote for?"
+    },
+    {
+      "id": "persp-0a1b08",
+      "target": "idea-0a1b08",
+      "verdict": "push back",
+      "take": "Starting badly beats waiting forever, but it is not always better than waiting a little. Some starts are expensive to undo.",
+      "better": "Start small and cheap rather than badly; a rough start is fine when it costs little to redo.",
+      "question": "What have you been waiting to start that would be cheap to try?"
+    },
+    {
+      "id": "persp-0a1b09",
+      "target": "idea-0a1b09",
+      "verdict": "mixed",
+      "take": "Grief for the old self describes some changes well. Others feel like relief, not loss, and the idea leaves those out.",
+      "better": "Change often asks you to let go of an old self; sometimes that feels like grief, sometimes like relief.",
+      "question": "Did your last real change feel more like loss or like relief?"
+    },
+    {
+      "id": "persp-0a1b0a",
+      "target": "idea-0a1b0a",
+      "verdict": "holds up",
+      "take": "You cannot change what happened, but you can change what it means to you now. That is a solid and useful distinction.",
+      "question": "What would a new telling of an old event sound like?"
+    },
+    {
+      "id": "persp-0a1b0b",
+      "target": "idea-0a1b0b",
+      "verdict": "holds up",
+      "take": "A kinder story lowers the cost of trying again. The idea is practical and easy to test.",
+      "question": "How would a friend describe your last failure?"
+    },
+    {
+      "id": "persp-0a1b0c",
+      "target": "idea-0a1b0c",
+      "verdict": "holds up",
+      "take": "Being heard before being advised matches how most people talk about hard things. It is a reliable rule of thumb.",
+      "question": "When do you jump to advice too soon?"
+    },
+    {
+      "id": "persp-0a1b0d",
+      "target": "idea-0a1b0d",
+      "verdict": "holds up",
+      "take": "A pause is a small act with a large effect on how heard someone feels. Easy to try in the next conversation.",
+      "question": "Could you count to three before your next reply?"
+    },
+    {
+      "id": "persp-0a1b0e",
+      "target": "idea-0a1b0e",
+      "verdict": "mixed",
+      "take": "Arguing with the strongest version is good discipline. It can also turn into a debate when the other person wanted something else.",
+      "question": "When has steelmanning made a conversation worse?"
+    },
+    {
+      "id": "persp-0a1b0f",
+      "target": "idea-0a1b0f",
+      "verdict": "holds up",
+      "take": "Many arguments are proxies for something between the people. Naming that can end a fight that the topic never would.",
+      "question": "What was your last argument really about?"
+    }
+  ],
+  "discussions": [
+    {
+      "id": "disc-01a2b3",
+      "title": "Start now, or do fewer things?",
+      "sides": [
+        "idea-0a1b08",
+        "idea-0a1b01"
+      ],
+      "take": "Starting badly encourages beginning many things; doing fewer things asks you to say no. They meet if you start badly only on the few things you chose.",
+      "question": "Which of the two do you lean on when you feel stuck?"
+    },
+    {
+      "id": "disc-02b3c4",
+      "title": "Argue the idea, or tend the relationship?",
+      "sides": [
+        "idea-0a1b0e",
+        "idea-0a1b0f"
+      ],
+      "take": "One idea says take the argument at its strongest; the other says the argument may not be the point. Telling which situation you are in is the real skill.",
+      "question": "How do you tell which kind of disagreement you are in?"
+    },
+    {
+      "id": "disc-03c4d5",
+      "title": "Sit with boredom, or fill the day with less?",
+      "sides": [
+        "idea-0a1b05",
+        "idea-0a1b04"
+      ],
+      "take": "A full calendar hides an empty day, and boredom shows up once it is emptied. Doing less invites exactly the boredom the other idea asks you to stay with.",
+      "question": "When your day empties out, what do you do with it?"
+    }
   ]
 }

@@ -18,6 +18,10 @@
   --mine: #7a3d8c;
   --mine-soft: #f3e9f5;
   --mine-ink: #ffffff;
+  /* Claude's take (perspectives, discussions): a third voice, used for nothing else. */
+  --claude: #2b5397;
+  --claude-soft: #e9edf8;
+  --claude-ink: #ffffff;
   --demo-soft: #f4e8c9;
   --shadow: 0 1px 2px rgba(30, 28, 23, .05), 0 6px 20px rgba(30, 28, 23, .05);
   --radius: 16px;
@@ -41,6 +45,9 @@
     --mine: #d6a2e8;
     --mine-soft: #2e2233;
     --mine-ink: #1d1221;
+    --claude: #9fbcee;
+    --claude-soft: #1f2436;
+    --claude-ink: #121628;
     --demo-soft: #3a3119;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
     color-scheme: dark;
@@ -215,6 +222,40 @@ h5 { font-size: 13px; margin: 14px 0 4px; color: var(--muted); font-weight: 650;
 .mine-page h3 { color: var(--mine); }
 .btn.mine-btn { background: var(--mine); color: var(--mine-ink); }
 
+/* Claude's take: its own --claude accent, a sparkle mark and a "Claude ·" label,
+   never confusable with the videos (plain cards) or the owner (--mine). */
+.claude-label { display: inline-flex; align-items: center; gap: 6px; color: var(--claude); font: 650 12px/1.4 var(--sans); text-transform: uppercase; letter-spacing: .07em; }
+.claude-mark { width: 12px; height: 12px; flex: none; background: var(--claude); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+.claude-take { margin: 16px 0 8px; background: var(--claude-soft); border: 1px solid var(--claude); border-left-width: 4px; border-radius: 14px; }
+.claude-take summary { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 8px; min-height: 52px; padding: 8px 14px; cursor: pointer; list-style: none; border-radius: 10px; }
+.claude-take summary::-webkit-details-marker { display: none; }
+.claude-take summary::after { content: ""; grid-row: 1 / span 2; grid-column: 2; width: 10px; height: 10px; border: solid var(--claude); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .15s; margin: 0 4px 4px 0; }
+.claude-take[open] summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
+.claude-take .claude-label { grid-column: 1; }
+.claude-title { grid-column: 1; font: 650 18px/1.3 var(--serif); color: var(--ink); }
+.claude-body { padding: 0 14px 14px; }
+.claude-body h4 { margin: 14px 0 2px; font: 650 13px/1.4 var(--sans); color: var(--claude); text-transform: uppercase; letter-spacing: .06em; }
+.verdict { display: inline-block; margin: 0 0 8px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--claude); color: var(--claude); font: 650 13px/1.6 var(--sans); }
+.take, .better, .claude-q { margin: 0; font: 17px/1.55 var(--serif); }
+.better { font-style: italic; }
+.claude-discs { margin: 0; padding-left: 20px; }
+.claude-discs a { color: var(--ink); text-decoration-color: var(--claude); text-underline-offset: 3px; display: inline-block; padding: 6px 0; }
+.reply-btn { margin-top: 14px; }
+.claude-row { background: var(--claude-soft); border-color: var(--claude); border-left-width: 4px; }
+/* Block flow (not flex), so "Replying to" and the take's name wrap like one sentence. */
+.reply-to { margin: 0 0 4px; color: var(--claude); font-size: 14px; font-weight: 650; }
+.reply-to .claude-mark { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+.reply-to a { color: var(--claude); text-underline-offset: 3px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.chip { min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--muted); background: var(--surface); color: var(--ink); font-size: 15px; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.chip-claude { border-color: var(--claude); color: var(--claude); }
+.chip-claude[aria-pressed="true"] { background: var(--claude); border-color: var(--claude); color: var(--claude-ink); }
+.note-links li.to-claude { border-left-color: var(--claude); }
+.reply-kind { flex: 1; color: var(--claude); font-weight: 650; font-size: 15px; }
+.prompt-q.claude-ask { background: var(--claude-soft); border-left: 3px solid var(--claude); }
+.prompt-q.claude-ask .claude-label { display: flex; margin-bottom: 2px; }
+
 /* ---------- tabs and the "+" button ---------- */
 .tabs {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
@@ -327,4 +368,5 @@ dialog::backdrop { background: rgba(0, 0, 0, .4); }
 
 @media (prefers-reduced-motion: reduce) {
   .btn:active, .icon-btn:active, .row:active { transform: none; }
+  .claude-take summary::after { transition: none; }
 }

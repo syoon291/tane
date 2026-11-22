@@ -6,18 +6,27 @@
 // so the owner's store holds only what the owner wrote.
 //   notes   { id, text, createdAt, editedAt, links: [Link], context, promptId?, ideaId? }
 //   myIdeas { id, text, fromNote, createdAt, editedAt, links: [Link] }
-//   Link    { to, type: "area" | "theme" | "idea" | "video" | "quote" | "myIdea", kind }
+//   Link    { to, type: "area" | "theme" | "idea" | "video" | "quote" | "myIdea" | "perspective" | "discussion", kind }
+// A reply to Claude's take is a note with a link to the take (type
+// "perspective" or "discussion", always kind "reply"); kind "reply" goes with
+// nothing else.
 //   context { screen: "explore" | "mine", type?, id? }: where the note was written.
 // ideaId on a note: the own idea it was made into. fromNote on an own idea:
 // the note it came from (kept when that note is deleted).
 import { hrefFor } from "./router.js";
 
+// KINDS: what the owner can pick for a link; "reply" is set only by Reply.
 export const KINDS = ["about", "agrees", "disagrees", "builds on"];
-export const KIND_LABEL = { about: "About", agrees: "Agrees with", disagrees: "Disagrees with", "builds on": "Builds on" };
-export const TYPES = ["area", "theme", "idea", "video", "quote", "myIdea"];
-export const TYPE_LABEL = { area: "Area", theme: "Theme", idea: "Idea", video: "Video", quote: "Quote", myIdea: "Your idea" };
+export const KIND_LABEL = { about: "About", agrees: "Agrees with", disagrees: "Disagrees with", "builds on": "Builds on", reply: "Replying to" };
+export const TYPES = ["area", "theme", "idea", "video", "quote", "myIdea", "perspective", "discussion"];
+export const TYPE_LABEL = { area: "Area", theme: "Theme", idea: "Idea", video: "Video", quote: "Quote", myIdea: "Your idea", perspective: "Claude's take", discussion: "Claude's discussion" };
 const SOURCE_TYPES = new Set(["area", "theme", "idea", "video", "quote"]);
 export const isSourceType = (t) => SOURCE_TYPES.has(t);
+const TAKE_TYPES = new Set(["perspective", "discussion"]);
+export const isTakeType = (t) => TAKE_TYPES.has(t);
+// The link a reply answers, or null.
+export const replyLink = (rec) => (rec?.links || []).find((l) => isTakeType(l.type)) ?? null;
+export const isReply = (rec) => !!replyLink(rec);
 
 export const mineHref = (id) => (id == null ? "#mine" : `#mine/idea/${encodeURIComponent(id)}`);
 
@@ -34,14 +43,14 @@ export function cleanLinks(links) {
   for (const l of Array.isArray(links) ? links : []) {
     if (!l || typeof l.to !== "string" || !l.to || !TYPES.includes(l.type)) continue;
     if (out.some((o) => same(o, l))) continue;
-    out.push({ to: l.to, type: l.type, kind: KINDS.includes(l.kind) ? l.kind : "about" });
+    out.push({ to: l.to, type: l.type, kind: isTakeType(l.type) ? "reply" : KINDS.includes(l.kind) ? l.kind : "about" });
   }
   return out;
 }
 
 export const addLink = (links, link) => cleanLinks([...links, { kind: "about", ...link }]);
 export const removeLink = (links, link) => links.filter((l) => !same(l, link));
-export const setKind = (links, link, kind) => links.map((l) => (same(l, link) ? { ...l, kind: KINDS.includes(kind) ? kind : "about" } : l));
+export const setKind = (links, link, kind) => links.map((l) => (same(l, link) && !isTakeType(l.type) ? { ...l, kind: KINDS.includes(kind) ? kind : "about" } : l));
 
 // What the "+" button links a new note to: whatever is on screen.
 // route: router.js parseHash output. Returns { context, links }.
@@ -49,22 +58,50 @@ export function contextFor(route, ix) {
   if (route.tab === "mine") {
     return route.level === "idea" && route.id ? { context: { screen: "mine", type: "myIdea", id: route.id }, links: [{ to: route.id, type: "myIdea", kind: "builds on" }] } : { context: { screen: "mine" }, links: [] };
   }
+  if (route.level === "discussion" && ix?.discussion(route.id)) {
+    return { context: { screen: "explore", type: "discussion", id: route.id }, links: replyLinks(ix, "discussion", route.id) };
+  }
   const known = ix && route.id && (route.level === "area" ? ix.area(route.id) : route.level === "theme" ? ix.theme(route.id) : route.level === "idea" ? ix.idea(route.id) : null);
   if (!known) return { context: { screen: "explore" }, links: [] };
   return { context: { screen: "explore", type: route.level, id: route.id }, links: [{ to: route.id, type: route.level, kind: "about" }] };
+}
+
+// The links a Reply starts with: the take (kind "reply") and what it is
+// about, so the reply also shows in "Your notes" there: a perspective's area,
+// theme or idea, or a discussion's sides.
+export function replyLinks(ix, type, id) {
+  if (type === "perspective") {
+    const p = ix?.perspective(id);
+    return p ? [{ to: p.id, type, kind: "reply" }, { to: p.target, type: p.type, kind: "about" }] : [];
+  }
+  const d = ix?.discussion(id);
+  return d ? [{ to: d.id, type, kind: "reply" }, ...d.sides.map((s) => ({ to: s, type: "idea", kind: "about" }))] : [];
+}
+
+// What a take is about, as a name: "Claude's take on <item>" or the discussion's title.
+function takeLabel(link, ix) {
+  if (link.type === "perspective") {
+    const p = ix.perspective(link.to);
+    if (!p) return null;
+    const on = p.type === "area" ? ix.area(p.target)?.name : p.type === "theme" ? ix.theme(p.target)?.name : ix.idea(p.target)?.claim;
+    return { label: `Claude's take on ${on}`, href: hrefFor(p.type, p.target) };
+  }
+  const d = ix.discussion(link.to);
+  return d ? { label: `Claude's discussion: ${d.title}`, href: hrefFor("discussion", d.id) } : null;
 }
 
 // A link's target, for showing: { type, typeLabel, label, href, missing, source }.
 // mine: { idea(id) } for own ideas. A target that is gone (a dropped video, an
 // own idea deleted) still shows, marked missing, so the note keeps its meaning.
 export function resolveLink(link, ix, mine) {
-  const base = { type: link.type, typeLabel: TYPE_LABEL[link.type] || "Item", source: isSourceType(link.type), missing: false, href: "" };
+  const base = { type: link.type, typeLabel: TYPE_LABEL[link.type] || "Item", source: isSourceType(link.type), claude: isTakeType(link.type), missing: false, href: "" };
   const gone = (label) => ({ ...base, label, missing: true });
   if (link.type === "myIdea") {
     const m = mine?.idea(link.to);
     return m ? { ...base, label: m.text, href: mineHref(m.id) } : gone("An idea of yours you deleted");
   }
   if (!ix) return gone("Not in the library on this device");
+  if (isTakeType(link.type)) { const t = takeLabel(link, ix); return t ? { ...base, ...t } : gone("A take of Claude's no longer in the library"); }
   if (link.type === "area") { const a = ix.area(link.to); return a ? { ...base, label: a.name, href: hrefFor("area", a.id) } : gone("An area no longer in the library"); }
   if (link.type === "theme") { const t = ix.theme(link.to); return t ? { ...base, label: t.name, href: hrefFor("theme", t.id) } : gone("A theme no longer in the library"); }
   if (link.type === "idea") { const i = ix.idea(link.to); return i ? { ...base, label: i.claim, href: hrefFor("idea", i.id), retired: i.status === "retired" } : gone("An idea no longer in the library"); }
