@@ -1,0 +1,623 @@
+{
+  "schema": "tane-library",
+  "v": 1,
+  "generatedAt": "2026-11-20T09:00:00.000Z",
+  "areas": [
+    {
+      "id": "area-a1c3e5",
+      "name": "Attention and time",
+      "summary": "Where the hours go, and what we notice while they pass."
+    },
+    {
+      "id": "area-b2d4f6",
+      "name": "Self and change",
+      "summary": "How we become who we are, and how we change."
+    },
+    {
+      "id": "area-c3e5a7",
+      "name": "Living with others",
+      "summary": "Listening, disagreeing and staying close."
+    }
+  ],
+  "themes": [
+    {
+      "id": "theme-1a2b3c",
+      "areaId": "area-a1c3e5",
+      "name": "Doing less, deliberately",
+      "summary": "Fewer things, chosen on purpose.",
+      "folder": "demo-focus"
+    },
+    {
+      "id": "theme-2b3c4d",
+      "areaId": "area-a1c3e5",
+      "name": "Boredom as a signal",
+      "summary": "What empty time is trying to say.",
+      "folder": "demo-focus"
+    },
+    {
+      "id": "theme-3c4d5e",
+      "areaId": "area-b2d4f6",
+      "name": "Habits and identity",
+      "summary": "Small acts and the self they build.",
+      "folder": "demo-self"
+    },
+    {
+      "id": "theme-4d5e6f",
+      "areaId": "area-b2d4f6",
+      "name": "Stories we tell ourselves",
+      "summary": "Memory, meaning and the next step.",
+      "folder": "demo-self"
+    },
+    {
+      "id": "theme-5e6f7a",
+      "areaId": "area-c3e5a7",
+      "name": "Listening",
+      "summary": "Hearing people before helping them.",
+      "folder": "demo-people"
+    },
+    {
+      "id": "theme-6f7a8b",
+      "areaId": "area-c3e5a7",
+      "name": "Disagreement",
+      "summary": "Arguing well, and knowing when to stop.",
+      "folder": "demo-people"
+    }
+  ],
+  "ideas": [
+    {
+      "id": "idea-0a1b01",
+      "themeId": "theme-1a2b3c",
+      "claim": "Doing fewer things well leaves more room than doing many things fast.",
+      "videoIds": [
+        "1000000004",
+        "1000000012"
+      ],
+      "prompts": [
+        {
+          "id": "p-000001",
+          "text": "What is one thing you could stop doing this week?"
+        },
+        {
+          "id": "p-000002",
+          "text": "When did doing less give you more?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b02",
+      "themeId": "theme-1a2b3c",
+      "claim": "Rest is part of the work, not a prize for finishing it.",
+      "videoIds": [
+        "1000000003"
+      ],
+      "prompts": [
+        {
+          "id": "p-000003",
+          "text": "What would change if rest did not have to be earned?"
+        },
+        {
+          "id": "p-000004",
+          "text": "Where do you feel guilty for resting?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b03",
+      "themeId": "theme-1a2b3c",
+      "claim": "Switching between tasks costs more attention than it seems to.",
+      "videoIds": [
+        "1000000004"
+      ],
+      "prompts": [
+        {
+          "id": "p-000005",
+          "text": "How many times did you switch tasks today?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b04",
+      "themeId": "theme-1a2b3c",
+      "claim": "A full calendar can hide an empty day.",
+      "videoIds": [
+        "1000000012",
+        "1000000003"
+      ],
+      "prompts": [
+        {
+          "id": "p-000006",
+          "text": "Which busy day last month felt empty afterwards?"
+        },
+        {
+          "id": "p-000007",
+          "text": "What fills your time that you did not choose?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b05",
+      "themeId": "theme-2b3c4d",
+      "claim": "Boredom is information about what you want, if you stay with it.",
+      "videoIds": [
+        "1000000001"
+      ],
+      "prompts": [
+        {
+          "id": "p-000008",
+          "text": "What did the last bout of boredom point at?"
+        },
+        {
+          "id": "p-000009",
+          "text": "What do you reach for when you feel bored?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b06",
+      "themeId": "theme-2b3c4d",
+      "claim": "Reaching for the phone hides the signal boredom sends.",
+      "videoIds": [
+        "1000000001",
+        "1000000004"
+      ],
+      "prompts": [
+        {
+          "id": "p-00000a",
+          "text": "What were you feeling the last time you picked up your phone without thinking?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b07",
+      "themeId": "theme-3c4d5e",
+      "claim": "Every small act is a vote for who you are becoming.",
+      "videoIds": [
+        "1000000005"
+      ],
+      "prompts": [
+        {
+          "id": "p-00000b",
+          "text": "What did you vote for today?"
+        },
+        {
+          "id": "p-00000c",
+          "text": "Which small act do you want more of?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b08",
+      "themeId": "theme-3c4d5e",
+      "claim": "Starting badly beats waiting to start well.",
+      "videoIds": [
+        "1000000002",
+        "1000000005"
+      ],
+      "prompts": [
+        {
+          "id": "p-00000d",
+          "text": "What are you waiting to do well before you begin?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b09",
+      "themeId": "theme-3c4d5e",
+      "claim": "Change starts with grief for the old self.",
+      "videoIds": [
+        "1000000007"
+      ],
+      "prompts": [
+        {
+          "id": "p-00000e",
+          "text": "What did your last big change cost you?"
+        },
+        {
+          "id": "p-00000f",
+          "text": "What are you still mourning?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0a",
+      "themeId": "theme-4d5e6f",
+      "claim": "The story about your past can change even though the past cannot.",
+      "videoIds": [
+        "1000000006"
+      ],
+      "prompts": [
+        {
+          "id": "p-000010",
+          "text": "Which part of your story would you tell differently now?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0b",
+      "themeId": "theme-4d5e6f",
+      "claim": "A kinder telling of a failure makes the next try easier.",
+      "videoIds": [
+        "1000000006",
+        "1000000002"
+      ],
+      "prompts": [
+        {
+          "id": "p-000011",
+          "text": "Retell one failure as if a friend had lived it."
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0c",
+      "themeId": "theme-5e6f7a",
+      "claim": "People want to be heard before they want advice.",
+      "videoIds": [
+        "1000000008",
+        "1000000009"
+      ],
+      "prompts": [
+        {
+          "id": "p-000012",
+          "text": "When did someone listen to you without fixing anything?"
+        },
+        {
+          "id": "p-000013",
+          "text": "Who in your life needs to be heard this week?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0d",
+      "themeId": "theme-5e6f7a",
+      "claim": "A pause before answering gives the other person room to say more.",
+      "videoIds": [
+        "1000000009"
+      ],
+      "prompts": [
+        {
+          "id": "p-000014",
+          "text": "What happens when you wait three seconds before replying?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0e",
+      "themeId": "theme-6f7a8b",
+      "claim": "Argue with the strongest version of an idea, not the weakest.",
+      "videoIds": [
+        "1000000010"
+      ],
+      "prompts": [
+        {
+          "id": "p-000015",
+          "text": "Which view do you dismiss without knowing its best case?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b0f",
+      "themeId": "theme-6f7a8b",
+      "claim": "Some arguments are about the relationship, not the topic.",
+      "videoIds": [
+        "1000000011",
+        "1000000008"
+      ],
+      "prompts": [
+        {
+          "id": "p-000016",
+          "text": "What was your last argument really about?"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "idea-0a1b10",
+      "themeId": "theme-0ld0ld",
+      "claim": "Productivity is mostly about the right tools.",
+      "videoIds": [
+        "1000000004"
+      ],
+      "prompts": [],
+      "status": "retired"
+    }
+  ],
+  "videos": [
+    {
+      "id": "1000000001",
+      "title": "Why an empty afternoon feels so loud",
+      "creator": "@demo.thinker",
+      "url": "https://www.tiktok.com/@demo/video/1000000001",
+      "summary": "A short talk on how boredom points at what we actually want, if we stay with it a little longer.",
+      "keyIdeas": [
+        "Boredom is information, not a failure",
+        "Reaching for the phone hides the signal"
+      ],
+      "quotes": [
+        {
+          "id": "q-d10a",
+          "text": "Boredom is the mind asking a question you keep hanging up on."
+        }
+      ]
+    },
+    {
+      "id": "1000000002",
+      "title": "The case for doing one thing badly",
+      "creator": "@demo.notes",
+      "url": "https://www.tiktok.com/@demo/video/1000000002",
+      "summary": "Starting small and imperfect beats waiting for the right conditions.",
+      "keyIdeas": [
+        "Small starts lower the cost of beginning",
+        "Quality follows repetition"
+      ],
+      "quotes": [
+        {
+          "id": "q-d20a",
+          "text": "Do it badly today so you can do it at all tomorrow."
+        }
+      ]
+    },
+    {
+      "id": "1000000003",
+      "title": "Rest is not a reward",
+      "creator": "@demo.stoic",
+      "url": "https://www.tiktok.com/@demo/video/1000000003",
+      "summary": "Treating rest as something earned keeps people from ever taking it.",
+      "keyIdeas": [
+        "Rest is part of the work",
+        "Guilt makes rest useless"
+      ],
+      "quotes": [
+        {
+          "id": "q-d30a",
+          "text": "You do not earn the night; it simply comes."
+        }
+      ]
+    },
+    {
+      "id": "1000000004",
+      "title": "A day with fewer tabs open",
+      "creator": "@demo.notes",
+      "url": "https://www.tiktok.com/@demo/video/1000000004",
+      "summary": "An experiment in single-tasking for a full day, and what changed.",
+      "keyIdeas": [
+        "Attention spent is attention gone",
+        "Switching has a hidden cost"
+      ],
+      "quotes": []
+    },
+    {
+      "id": "1000000005",
+      "title": "You are what you repeat (sort of)",
+      "creator": "@demo.thinker",
+      "url": "https://www.tiktok.com/@demo/video/1000000005",
+      "summary": "Habits shape identity, but identity also shapes which habits stick.",
+      "keyIdeas": [
+        "Identity and habit feed each other",
+        "Votes for who you want to be"
+      ],
+      "quotes": [
+        {
+          "id": "q-d50a",
+          "text": "Every small act is a vote, not a verdict."
+        }
+      ]
+    },
+    {
+      "id": "1000000006",
+      "title": "The story you tell about your past",
+      "creator": "@demo.walks",
+      "url": "https://www.tiktok.com/@demo/video/1000000006",
+      "summary": "We edit our memories into stories, and the stories steer what we do next.",
+      "keyIdeas": [
+        "Memory is edited, not stored",
+        "A new telling can change the next step"
+      ],
+      "quotes": [
+        {
+          "id": "q-d60a",
+          "text": "The past is fixed; the story about it is not."
+        }
+      ]
+    },
+    {
+      "id": "1000000007",
+      "title": "Change feels like loss first",
+      "creator": "@demo.stoic",
+      "url": "https://www.tiktok.com/@demo/video/1000000007",
+      "summary": "Why even good changes start with grief for the old self.",
+      "keyIdeas": [
+        "Every change ends something",
+        "Name the loss to move through it"
+      ],
+      "quotes": []
+    },
+    {
+      "id": "1000000008",
+      "title": "Listening without fixing",
+      "creator": "@demo.walks",
+      "url": "https://www.tiktok.com/@demo/video/1000000008",
+      "summary": "Most people want to be heard before they want advice.",
+      "keyIdeas": [
+        "Reflect before you respond",
+        "Advice too early closes the door"
+      ],
+      "quotes": [
+        {
+          "id": "q-d80a",
+          "text": "Ask what they need before you give what you have."
+        }
+      ]
+    },
+    {
+      "id": "1000000009",
+      "title": "The pause before you answer",
+      "creator": "@demo.thinker",
+      "url": "https://www.tiktok.com/@demo/video/1000000009",
+      "summary": "A breath before replying changes the whole conversation.",
+      "keyIdeas": [
+        "Silence gives the other person room",
+        "A pause is not agreement"
+      ],
+      "quotes": [
+        {
+          "id": "q-d90a",
+          "text": "Let the quiet do some of the work."
+        }
+      ]
+    },
+    {
+      "id": "1000000010",
+      "title": "Disagree with the best version",
+      "creator": "@demo.notes",
+      "url": "https://www.tiktok.com/@demo/video/1000000010",
+      "summary": "Argue with the strongest form of an idea, not the weakest.",
+      "keyIdeas": [
+        "Steelman before you critique",
+        "You learn more from strong opposition"
+      ],
+      "quotes": [
+        {
+          "id": "q-d100a",
+          "text": "If you cannot state their view well, you are not ready to reject it."
+        }
+      ]
+    },
+    {
+      "id": "1000000011",
+      "title": "When to let an argument go",
+      "creator": "@demo.stoic",
+      "url": "https://www.tiktok.com/@demo/video/1000000011",
+      "summary": "Not every disagreement needs a winner.",
+      "keyIdeas": [
+        "Some arguments are about the relationship, not the topic",
+        "Letting go can be a choice, not a loss"
+      ],
+      "quotes": []
+    },
+    {
+      "id": "1000000012",
+      "title": "Busy is not the same as full",
+      "creator": "@demo.walks",
+      "url": "https://www.tiktok.com/@demo/video/1000000012",
+      "summary": "A full life and a full calendar are different things.",
+      "keyIdeas": [
+        "Busyness can be a way to avoid",
+        "Choose what fills the time"
+      ],
+      "quotes": [
+        {
+          "id": "q-d120a",
+          "text": "A crowded day can still be an empty one."
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "idea-0a1b02",
+      "to": "idea-0a1b04",
+      "kind": "supports",
+      "why": "Rest that is not earned leaves the day less crowded."
+    },
+    {
+      "from": "idea-0a1b03",
+      "to": "idea-0a1b01",
+      "kind": "supports",
+      "why": "If switching is costly, fewer things in a day go further."
+    },
+    {
+      "from": "idea-0a1b06",
+      "to": "idea-0a1b05",
+      "kind": "extends",
+      "why": "Names the habit that keeps boredom's message from arriving."
+    },
+    {
+      "from": "idea-0a1b08",
+      "to": "idea-0a1b07",
+      "kind": "extends",
+      "why": "A bad start is still a vote."
+    },
+    {
+      "from": "idea-0a1b0b",
+      "to": "idea-0a1b0a",
+      "kind": "extends",
+      "why": "A concrete way to retell the past."
+    },
+    {
+      "from": "idea-0a1b0d",
+      "to": "idea-0a1b0c",
+      "kind": "supports",
+      "why": "The pause is how someone feels heard."
+    },
+    {
+      "from": "idea-0a1b0e",
+      "to": "idea-0a1b0f",
+      "kind": "contradicts",
+      "why": "Arguing the best case assumes the topic matters; sometimes it does not."
+    },
+    {
+      "from": "idea-0a1b08",
+      "to": "idea-0a1b01",
+      "kind": "contradicts",
+      "why": "Starting many things badly pulls against doing fewer things well."
+    },
+    {
+      "from": "idea-0a1b09",
+      "to": "idea-0a1b0a",
+      "kind": "supports",
+      "why": "Grieving the old self is part of retelling the story."
+    },
+    {
+      "from": "idea-0a1b10",
+      "to": "idea-0a1b01",
+      "kind": "contradicts",
+      "why": "Tools promise speed; doing less asks for choice."
+    }
+  ],
+  "threads": [
+    {
+      "id": "thread-7c8d9e",
+      "title": "Slowing down",
+      "question": "What would you notice if you did half as much?",
+      "ideaIds": [
+        "idea-0a1b01",
+        "idea-0a1b05",
+        "idea-0a1b0d"
+      ]
+    },
+    {
+      "id": "thread-8d9e0f",
+      "question": "Which story about yourself is ready to change?",
+      "ideaIds": [
+        "idea-0a1b0a",
+        "idea-0a1b07",
+        "idea-0a1b09"
+      ]
+    }
+  ],
+  "core": [
+    {
+      "id": "core-9e0f1a",
+      "belief": "Space comes before growth: in a day, in a mind, in a conversation.",
+      "ideaIds": [
+        "idea-0a1b01",
+        "idea-0a1b05",
+        "idea-0a1b0d"
+      ]
+    }
+  ]
+}
