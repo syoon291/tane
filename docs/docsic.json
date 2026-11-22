@@ -1,0 +1,10 @@
+{
+  "updated": "2026-11-21",
+  "stacks": [],
+  "release": {
+    "deploy": "push to main: the Pages GitHub Actions workflow (.github/workflows/pages.yml) runs the unit tests and the check, then publishes the app files to GitHub Pages",
+    "url": "https://syoon291.github.io/tane/"
+  },
+  "env": {},
+  "notes": "Test commands and dev server live only in .claude/test-manifest.json; this file keeps the release facts. No env vars, no secrets, no backend."
+}

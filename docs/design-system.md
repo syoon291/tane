@@ -1,0 +1,40 @@
+---
+owns:
+  - styles.css
+  - icons/**
+status: current
+---
+
+# Design System
+
+Calm and reading-first, built for a 390px phone in light and dark (`prefers-color-scheme`). One column, max 600px.
+
+## Tokens (`:root`, redefined for dark)
+
+| Token | Use |
+|-------|-----|
+| `--bg`, `--surface`, `--surface-2`, `--line` | Page, cards, quiet buttons, card edges |
+| `--ink`, `--muted` | Text, secondary text (7:1 on every surface) |
+| `--accent`, `--accent-ink` | Links, primary buttons, the seed mark |
+| `--supports` (green), `--contradicts` (red), `--extends` (cyan) | Link kinds between ideas; always with a text label and a mark shape (square, diamond, circle). `--supports`/`--contradicts` also color good/bad messages |
+| `--mine`, `--mine-soft` | The owner's own content only (the "Your notes" section now; notes and own ideas in phase 2). Never used for source content |
+| `--demo-soft` | The demo bar |
+| `--serif`, `--sans` | Serif (system: New York / Georgia) for headings, claims, quotes, prompts; sans for UI |
+
+Contrast floors are enforced by `scripts/contrast.mjs` through `npm run check`: ink and muted 7:1 on bg/surface/surface-2, colored text 4.5:1, ink 7:1 on the soft backgrounds. Change lightness, not hue.
+
+## Components
+
+- Rows (`.row`): a full-width link card with a serif title, summary and a muted meta line.
+- Breadcrumb (`.crumbs`): wraps, `›` separators, 44px-tall links.
+- Video card (`.card.video`), quotes (`.quote`, serif italic with a left rule), prompts (serif cards).
+- Link groups (`.link-group.kind-*`): a colored heading with its mark, items with a colored left edge, a direction line and the why.
+- Your notes (`.mine-section`): dashed `--mine` border on `--mine-soft`, always after and outside the source block.
+- Buttons: `.btn` (accent), `.btn.ghost`, `.icon-btn` (44px), `.link-btn`.
+- Bottom sheet: `<dialog>` with `.sheet`, safe-area padding.
+
+Safe-area insets pad the header, body sides and sheet bottom; tap targets are at least 44px; body text 17px.
+
+## Icon
+
+A cream seed with one leaf on the accent green (`icons/icon.svg`, rounded; the PNGs are full-bleed squares for iOS and maskable use). `scripts/icons.mjs` draws all of them from one set of shapes, with no dependencies; the header mark in `index.html` uses the same geometry.

@@ -1,0 +1,55 @@
+# CI and hosting. Every pull request runs the unit tests and the fast check and
+# builds the site artifact; only a push to main (or a manual run) deploys it to
+# GitHub Pages (repo Pages source: GitHub Actions).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  # Never cut a running deploy short; a superseded PR run can go.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit tests
+        run: npm test
+      - name: Check
+        run: npm run check
+      - name: Stage the site
+        # Only the app ships: docs, tests, scripts and repo tooling stay out of the public site.
+        run: |
+          mkdir _site
+          cp -R index.html app.js ui.js db.js backup.js library.js router.js sync.js explore-view.js data-view.js styles.css sw.js manifest.webmanifest icons demo _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

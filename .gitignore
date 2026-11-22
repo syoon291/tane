@@ -1,4 +1,14 @@
 node_modules/
 .DS_Store
-.claude/worktrees/
 *.local
+.env
+.env.*
+*.pem
+# never commit personal data, a real library or exports
+data/
+exports/
+library/
+latest.json
+tane-backup-*.json
+.claude/*
+!.claude/test-manifest.json
