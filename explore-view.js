@@ -10,6 +10,7 @@ import { esc } from "./ui.js";
 import { hrefFor } from "./router.js";
 import { plural } from "./library.js";
 import { yourNotes } from "./mine-view.js";
+import { mapBar, mapSection, backFor } from "./map-view.js";
 
 // mine (optional): the owner's content (app.js mineApi). Without it the pages
 // show no "Your notes" section (and no note buttons).
@@ -59,7 +60,9 @@ export function claudeTake(ix, targetId, mine, on) {
 const heading = (text, cls = "") => `<h2 class="page-title ${cls}" tabindex="-1" data-focus>${esc(text)}</h2>`;
 const AREAS = { label: "Areas", href: hrefFor() };
 
-export function areasPage(ix, sourceLine = "") {
+// map (optional): { bar, map } from renderExplore: the Map | List toggle, and
+// the map that takes the place of the list.
+export function areasPage(ix, sourceLine = "", { bar = "", map = null } = {}) {
   const t = ix.totals;
   const items = ix.areas.map((a) => {
     const s = ix.areaStats(a.id);
@@ -73,7 +76,8 @@ export function areasPage(ix, sourceLine = "") {
     ${crumbs([{ label: "Areas" }])}
     ${heading("Areas")}
     <p class="sub">${plural(t.areas, "area")} · ${plural(t.themes, "theme")} · ${plural(t.ideas, "idea")} from ${plural(t.videos, "video")}</p>
-    ${items ? `<ul class="rows">${items}</ul>` : `<p class="card empty">This library has no areas yet.</p>`}
+    ${bar}
+    ${map ?? (items ? `<ul class="rows">${items}</ul>` : `<p class="card empty">This library has no areas yet.</p>`)}
     ${ix.discussions.length ? `<h3 id="discs-h">Discussions</h3><ul class="rows" aria-labelledby="discs-h"><li><a class="row claude-row" href="${hrefFor("discussions")}">
       ${claudeLabel("discussions")}
       <span class="row-title">Where ideas pull against each other</span>
@@ -82,7 +86,7 @@ export function areasPage(ix, sourceLine = "") {
     ${sourceLine ? `<p class="hint source-line">${sourceLine}</p>` : ""}`;
 }
 
-export function areaPage(ix, areaId, mine) {
+export function areaPage(ix, areaId, mine, { bar = "", map = null } = {}) {
   const a = ix.area(areaId);
   if (!a) return notFound("That area is not in the library.");
   const items = ix.themesOf(a.id).map((t) => {
@@ -98,13 +102,14 @@ export function areaPage(ix, areaId, mine) {
     <p class="eyebrow">Area</p>
     ${heading(a.name)}
     ${a.summary ? `<p class="sub">${esc(a.summary)}</p>` : ""}
+    ${bar}
+    ${map ?? `<h3 id="themes-h">Themes</h3>
+    ${items ? `<ul class="rows" aria-labelledby="themes-h">${items}</ul>` : `<p class="card empty">No themes in this area yet.</p>`}`}
     ${claudeTake(ix, a.id, mine, a.name)}
-    <h3 id="themes-h">Themes</h3>
-    ${items ? `<ul class="rows" aria-labelledby="themes-h">${items}</ul>` : `<p class="card empty">No themes in this area yet.</p>`}
     ${yourNotes("area", a.id, ix, mine)}`;
 }
 
-export function themePage(ix, themeId, mine) {
+export function themePage(ix, themeId, mine, { bar = "", map = null } = {}) {
   const t = ix.theme(themeId);
   if (!t) return notFound("That theme is not in the library.");
   const a = ix.area(t.areaId);
@@ -117,9 +122,10 @@ export function themePage(ix, themeId, mine) {
     <p class="eyebrow">Theme</p>
     ${heading(t.name)}
     ${t.summary ? `<p class="sub">${esc(t.summary)}</p>` : ""}
+    ${bar}
+    ${map ?? `<h3 id="ideas-h">Ideas</h3>
+    ${items ? `<ul class="rows" aria-labelledby="ideas-h">${items}</ul>` : `<p class="card empty">No ideas in this theme yet.</p>`}`}
     ${claudeTake(ix, t.id, mine, t.name)}
-    <h3 id="ideas-h">Ideas</h3>
-    ${items ? `<ul class="rows" aria-labelledby="ideas-h">${items}</ul>` : `<p class="card empty">No ideas in this theme yet.</p>`}
     ${yourNotes("theme", t.id, ix, mine)}`;
 }
 
@@ -260,12 +266,20 @@ export function shorten(text, max = 40) {
   return `${cut.slice(0, cut.lastIndexOf(" ") > 20 ? cut.lastIndexOf(" ") : max).trimEnd()}…`;
 }
 
-// The screen for a route, given a built index.
-export function renderExplore(route, ix, sourceLine, mine) {
-  if (route.level === "area") return areaPage(ix, route.id, mine);
-  if (route.level === "theme") return themePage(ix, route.id, mine);
+// The screen for a route, given a built index. mapState (optional, from
+// app.js): { view: "map" | "list", show, folder }. With it the areas, area and
+// theme levels get the Map | List toggle, and the map in place of the list
+// when view is "map". Without it they are the plain list.
+export function renderExplore(route, ix, sourceLine, mine, mapState = null) {
+  const opts = (level, id, name) => {
+    if (!mapState) return {};
+    const view = mapState.view === "list" ? "list" : "map";
+    return { bar: mapBar(view, backFor(level, id, ix)), map: view === "map" ? mapSection(level, id, ix, mine, mapState, name) : null };
+  };
+  if (route.level === "area") { const a = ix.area(route.id); return areaPage(ix, route.id, mine, a ? opts("area", a.id, a.name) : {}); }
+  if (route.level === "theme") { const t = ix.theme(route.id); return themePage(ix, route.id, mine, t ? opts("theme", t.id, t.name) : {}); }
   if (route.level === "idea") return ideaPage(ix, route.id, mine);
   if (route.level === "discussions") return discussionsPage(ix);
   if (route.level === "discussion") return discussionPage(ix, route.id, mine);
-  return areasPage(ix, sourceLine);
+  return areasPage(ix, sourceLine, opts("areas", null, "areas"));
 }

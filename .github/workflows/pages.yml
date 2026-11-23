@@ -34,7 +34,7 @@ jobs:
         # Only the app ships: docs, tests, scripts and repo tooling stay out of the public site.
         run: |
           mkdir _site
-          cp -R index.html app.js ui.js db.js backup.js library.js router.js sync.js explore-view.js data-view.js merge.js notes.js export.js mine-view.js mine-store.js note-sheet.js styles.css sw.js manifest.webmanifest icons demo _site/
+          cp -R index.html app.js ui.js db.js backup.js library.js router.js sync.js explore-view.js data-view.js merge.js notes.js export.js mine-view.js mine-store.js note-sheet.js map-model.js map-view.js styles.css sw.js manifest.webmanifest icons demo _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
