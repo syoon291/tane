@@ -366,7 +366,59 @@ dialog::backdrop { background: rgba(0, 0, 0, .4); }
 .msg.good { color: var(--supports); }
 .msg.bad { color: var(--contradicts); }
 
+/* ---------- the Explore map (map-view.js) ---------- */
+.map-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 6px; }
+.back-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font-weight: 650; text-decoration: none; }
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg-btn { min-height: 38px; min-width: 64px; padding: 4px 14px; border: 0; border-radius: 999px; background: transparent; font-size: 15px; font-weight: 650; color: var(--muted); }
+.seg-btn[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.map-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.map-filters .chip { min-height: 40px; padding: 6px 13px; font-size: 14px; }
+.chip-mine { border-color: var(--mine); color: var(--mine); }
+.chip-mine[aria-pressed="true"] { background: var(--mine); border-color: var(--mine); color: var(--mine-ink); }
+.folder-pick { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.folder-pick select { min-height: 40px; padding: 6px 10px; border-radius: 12px; border: 1px solid var(--muted); background: var(--surface); color: var(--ink); max-width: 60vw; }
+.map { margin: 0 -8px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+.map-svg { display: block; width: 100%; height: auto; fill: none; stroke: none; touch-action: manipulation; transition: transform .24s ease-in, opacity .24s ease-in; }
+.map-svg.zoom-out { transform: scale(2.6); opacity: 0; }
+.map.map-in .map-svg { animation: map-in .3s ease-out; }
+@keyframes map-in { from { transform: scale(.72); opacity: 0; } }
+.map .edge { stroke-linecap: round; }
+.edge-supports { stroke: var(--supports); }
+.edge-contradicts { stroke: var(--contradicts); stroke-dasharray: 7 5; }
+.edge-extends { stroke: var(--extends); stroke-dasharray: 1.5 4.5; }
+.edge-mine { stroke: var(--mine); stroke-dasharray: 10 4 2 4; }
+.node { cursor: pointer; }
+.node .hit { fill: transparent; stroke: none; }
+.node .bubble { fill: color-mix(in srgb, var(--accent) 13%, var(--surface)); stroke: var(--accent); stroke-width: 1.6; }
+.node-theme .bubble { fill: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.node .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.node .ghost { fill: var(--surface-2); stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 2; }
+.node .mine-node { fill: var(--mine); stroke: var(--surface); stroke-width: 2; }
+.node .wrote-mark { fill: var(--mine); stroke: var(--surface); stroke-width: 2; }
+.node text { stroke: none; }
+.bubble-label { fill: var(--ink); font: 650 13.5px/1 var(--serif); }
+.bubble-sub { fill: var(--muted); font: 600 11.5px/1 var(--sans); }
+.dot-label { fill: var(--ink); font: 500 11.5px/1 var(--sans); }
+.ghost-label { fill: var(--muted); font-style: italic; }
+.mine-label { fill: var(--mine); font-weight: 650; }
+.node:focus { outline: none; }
+.node:focus-visible .hit { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 4 3; }
+@media (hover: hover) { .node:hover .bubble, .node:hover .dot { stroke-width: 3; } }
+.map-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 4px; padding: 0; font-size: 13.5px; color: var(--muted); }
+.map-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid; }
+.key-supports { border-color: var(--supports); }
+.key-contradicts { border-color: var(--contradicts); border-top-style: dashed; }
+.key-extends { border-color: var(--extends); border-top-style: dotted; }
+.key-mine { width: 11px; height: 11px; border: 0; border-radius: 2px; background: var(--mine); transform: rotate(45deg); }
+.key-wrote { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--mine); }
+.key-ghost { width: 11px; height: 11px; border: 1.5px dashed var(--muted); border-radius: 50%; background: var(--surface-2); }
+.map-empty { text-align: center; }
+
 @media (prefers-reduced-motion: reduce) {
+  .map-svg { transition: none; }
+  .map.map-in .map-svg { animation: none; }
   .btn:active, .icon-btn:active, .row:active { transform: none; }
   .claude-take summary::after { transition: none; }
 }

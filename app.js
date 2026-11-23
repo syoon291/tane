@@ -24,6 +24,12 @@ const TOKEN = "githubToken";
 const state = { demo: false, linked: false, record: null, index: null, lastError: "", loading: false, failed: "", mineQuery: "", mineFilter: "all" };
 // The owner's notes and own ideas (memory only in the demo). Set in boot().
 let mine = createMine({ demo: true });
+// The Explore map: Map or List (remembered on this device), and its filters
+// (for this visit only).
+const VIEW_KEY = "tane.exploreView";
+const readView = () => { try { return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "map"; } catch { return "map"; } };
+state.map = { view: readView(), show: "all", folder: "" };
+const reduceMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 function useLibrary(data) {
   const parsed = parseLibrary(data);
@@ -156,7 +162,7 @@ function render() {
   // A re-render (a background reload or sync) keeps focus on the same link,
   // button or search box.
   const a = document.activeElement;
-  const keep = a && view.contains(a) ? (a.id === "mine-q" ? "#mine-q" : a.getAttribute("href") ? `[href="${CSS.escape(a.getAttribute("href"))}"]` : a.dataset.act ? `[data-act="${CSS.escape(a.dataset.act)}"]${a.dataset.id ? `[data-id="${CSS.escape(a.dataset.id)}"]` : ""}` : a.hasAttribute("data-focus") ? "[data-focus]" : null) : null;
+  const keep = a && view.contains(a) ? (a.id ? `#${CSS.escape(a.id)}` : a.getAttribute("href") ? `[href="${CSS.escape(a.getAttribute("href"))}"]` : a.dataset.act ? `[data-act="${CSS.escape(a.dataset.act)}"]${a.dataset.id ? `[data-id="${CSS.escape(a.dataset.id)}"]` : ""}` : a.hasAttribute("data-focus") ? "[data-focus]" : null) : null;
   const caret = a?.id === "mine-q" ? a.selectionStart : null;
   // An opened "Claude's take" stays open through a re-render of the same page.
   const opened = new Set([...view.querySelectorAll("details[data-keep-open][open]")].map((d) => d.dataset.keepOpen));
@@ -169,7 +175,7 @@ function render() {
   } else if (!state.index) {
     view.innerHTML = welcome();
   } else {
-    view.innerHTML = renderExplore(route, state.index, sourceLine(), api);
+    view.innerHTML = renderExplore(route, state.index, sourceLine(), api, state.map);
   }
   for (const d of view.querySelectorAll("details[data-keep-open]")) if (opened.has(d.dataset.keepOpen)) d.open = true;
   for (const t of document.querySelectorAll(".tabs a")) {
@@ -223,11 +229,36 @@ function noteOn(el) {
 // screen reader reads the new page.
 function navigated() {
   render();
+  if (!reduceMotion()) view.querySelector(".map")?.classList.add("map-in");
   window.scrollTo(0, 0);
   view.querySelector("[data-focus]")?.focus({ preventScroll: true });
 }
 
+// Tap a bubble on the map: zoom into it, then open its level.
+function zoomInto(link, e) {
+  const svg = link.closest("svg");
+  const href = link.getAttribute("href");
+  if (reduceMotion() || !svg) { location.hash = href; return; }
+  const box = svg.getBoundingClientRect(), dot = link.querySelector(".bubble")?.getBoundingClientRect() ?? box;
+  svg.style.transformOrigin = `${dot.left + dot.width / 2 - box.left}px ${dot.top + dot.height / 2 - box.top}px`;
+  svg.classList.add("zoom-out");
+  let done = false;
+  const go = () => { if (!done) { done = true; location.hash = href; } };
+  svg.addEventListener("transitionend", go, { once: true });
+  setTimeout(go, 320);
+  e.preventDefault();
+}
+
+function setMap(change, say) {
+  Object.assign(state.map, change);
+  if ("view" in change) { try { localStorage.setItem(VIEW_KEY, state.map.view); } catch { /* the choice lasts this visit */ } }
+  render();
+  if (say) announce(say);
+}
+
 view.addEventListener("click", (e) => {
+  const zoom = e.target.closest("a[data-zoom]");
+  if (zoom && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); zoomInto(zoom, e); return; }
   const el = e.target.closest("[data-act]");
   if (!el) return;
   const act = el.dataset.act;
@@ -240,6 +271,12 @@ view.addEventListener("click", (e) => {
   if (act === "export-md") exportMine("md");
   if (act === "export-json") exportMine("json");
   if (act === "sync") mine.sync();
+  if (act === "map-view") setMap({ view: el.dataset.id }, el.dataset.id === "list" ? "Showing the list." : "Showing the map.");
+  if (act === "map-show") setMap({ show: el.dataset.id }, `Showing: ${el.textContent.trim()}.`);
+  if (act === "map-reset") setMap({ show: "all", folder: "" }, "Showing everything.");
+});
+view.addEventListener("change", (e) => {
+  if (e.target.id === "map-folder") setMap({ folder: e.target.value }, e.target.value ? `Showing the folder ${e.target.value}.` : "Showing all folders.");
 });
 // Search what you wrote: only the results redraw, so the box keeps focus.
 view.addEventListener("input", (e) => {
