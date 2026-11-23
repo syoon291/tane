@@ -174,7 +174,7 @@ export function mapModel(level, id, ix, mine, { show = "all", folder = "" } = {}
 }
 
 // The room a node takes in the layout: its circle, or the label under a dot.
-export const roomOf = (node) => (node.kind === "area" || node.kind === "theme" ? node.r : node.kind === "ghost" ? 38 : 44);
+export const roomOf = (node) => (node.kind === "area" || node.kind === "theme" ? node.r : node.kind === "ghost" ? 38 : node.kind === "mine" ? 54 : 44);
 
 // A small force layout: nodes start on a golden-angle spiral (no randomness,
 // so the same data always draws the same map), lines pull their ends together,
